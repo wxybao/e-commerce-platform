@@ -15,13 +15,13 @@
       </div>
 
       <div class="flex">
-        <div class="flex-1 mr-8 goods-card" @click="gotoDetail()">
+        <div class="flex-1 mr-8 goods-card" @click="gotoDetail(1)">
           <div class="img-box"><img src="@/assets/goods-1.png"/></div>
           <div class="goods-title">Повышенной<br/>проходимости<br/>gokart</div>
           <div class="goods-price">$599.00 USDT</div>
           <div class="goods-price-line">$649.0 USDT</div>
         </div>
-        <div class="flex-1 goods-card">
+        <div class="flex-1 goods-card" @click="gotoDetail(2)">
           <div class="img-box"><img src="@/assets/goods-2.png"/></div>
           <div class="goods-title">Повышенной<br/>проходимости<br/>gokart (pro)</div>
           <div class="goods-price">$875.00 USDT</div>
@@ -149,9 +149,12 @@ function getImageUrl(url) {
   return new URL(url, import.meta.url).href;
 }
 
-function gotoDetail() {
+function gotoDetail(id) {
   router.push({
-    name: 'GoodsDetail'
+    name: 'GoodsDetail',
+    query: {
+      id
+    }
   })
 }
 </script>

@@ -2,9 +2,12 @@
   <div class="detail">
     <div class="product-content">
       <div class="product-img">
-        <img src="../assets/goods-1.png"/>
+        <template v-if="productId === 1"><img src="../assets/goods-1.png"/></template>
+        <template v-else><img src="../assets/goods-2.png"/></template>
       </div>
-      <div class="product-name">Повышенной проходимости gokart</div>
+      <div class="product-name">
+        {{ productId === 1 ? 'Повышенной проходимости gokart' : 'Повышенной проходимости gokart (pro)' }}
+      </div>
 
       <div class="mt-30">
         <div class="flex-left">
@@ -18,10 +21,10 @@
         </div>
       </div>
 
-      <div class="product-price">$599.00 USDT</div>
+      <div class="product-price">${{productId === 1 ? '599.00' : '875.00'}} USDT</div>
 
       <div class="flex-between mt-20">
-        <van-stepper v-model="productNum" button-size="44px" input-width="70px" integer class="mr-20 input-stepper"/>
+        <van-stepper v-model="productNum" :min="1" :max="99" button-size="44px" input-width="70px" integer class="mr-20 input-stepper"/>
         <van-button type="primary" color="#F55266" @click="popupVisible = true">КУПИТЬ СЕЙЧАС</van-button>
       </div>
 
@@ -130,17 +133,24 @@
 import PageFooter from "@/components/PageFooter.vue";
 import {ref} from "vue";
 import AddressItem from "@/components/AddressItem.vue";
+import {useRoute} from "vue-router";
+
+const route = useRoute()
+const productId = Number(route.query.id || 0)
 
 const colors = [
   {
-    color: '#4E5562',
+    color: '#5A7AA1',
     name: 'Blue',
   }, {
-    color: '#EB5757',
+    color: '#EE7976',
     name: 'Red',
   }, {
-    color: '#F2C94C',
-    name: 'Yellow',
+    color: '#9ACBF1',
+    name: 'Light Blue',
+  }, {
+    color: '#202732',
+    name: 'Black',
   }]
 const activeColor = ref(0)
 
@@ -247,8 +257,8 @@ const addressList = [1]
       &:after {
         content: '';
         position: absolute;
-        top: 2px;
-        left: 2px;
+        top: 2.5px;
+        left: 2.5px;
         width: 14px;
         height: 14px;
         border-radius: 50%;

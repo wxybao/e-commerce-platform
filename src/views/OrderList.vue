@@ -3,37 +3,69 @@
     <div class="title">Заказы</div>
 
     <div class="orders">
-      <div class="order-item" v-for="item in orderList" :key="item">
-        <img src="@/assets/goods-1.png"/>
-        <van-row class="mt-16">
-          <van-col span="12" class="item-label">Заказ #</van-col>
-          <van-col span="12" class="item-content">All terrain off-road go kart</van-col>
-        </van-row>
-        <van-row class="mt-16">
-          <van-col span="12" class="item-label">Цвет</van-col>
-          <van-col span="12" class="item-content">blue</van-col>
-        </van-row>
-        <van-row class="mt-16">
-          <van-col span="12" class="item-label">Дата заказа</van-col>
-          <van-col span="12" class="item-content">12 декабря 2024 года</van-col>
-        </van-row>
-        <van-row class="mt-16">
-          <van-col span="12" class="item-label">Статус</van-col>
-          <van-col span="12" class="item-content">Доставлено</van-col>
-        </van-row>
-        <van-row class="mt-16">
-          <van-col span="12" class="item-label">Итог</van-col>
-          <van-col span="12" class="item-content">$240 USDT</van-col>
-        </van-row>
-      </div>
+      <template v-if="hasInit && !orderList.length">
+        <van-empty description="еще ничего не купил"/>
+      </template>
+      <template v-else>
+        <div class="order-item" v-for="item in orderList" :key="item">
+          <img :src="item.image"/>
+          <van-row class="mt-16">
+            <van-col span="12" class="item-label">Заказ #</van-col>
+            <van-col span="12" class="item-content">{{ item.id }}</van-col>
+          </van-row>
+          <van-row class="mt-16">
+            <van-col span="12" class="item-label">Цвет</van-col>
+            <van-col span="12" class="item-content">{{ item.color }}</van-col>
+          </van-row>
+          <van-row class="mt-16">
+            <van-col span="12" class="item-label">Дата заказа</van-col>
+            <van-col span="12" class="item-content">{{ item.createdAt }}</van-col>
+          </van-row>
+          <van-row class="mt-16">
+            <van-col span="12" class="item-label">Статус</van-col>
+            <van-col span="12" class="item-content">Доставлено</van-col>
+          </van-row>
+          <van-row class="mt-16">
+            <van-col span="12" class="item-label">Итог</van-col>
+            <van-col span="12" class="item-content">${{ item.price }} USDT</van-col>
+          </van-row>
+        </div>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup>
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
+import {sale_order} from "@/api/api.js";
+import {showToast} from "vant";
 
-const orderList = ref([1])
+const orderList = ref([])
+const pageIndex = 1
+const hasInit = ref(false)
+
+onMounted(() => {
+  getOrderList()
+})
+
+function getOrderList() {
+  sale_order({
+    limit: 100,
+    offset: pageIndex,
+    userId: '1'
+  }).then(res => {
+    if (res.code === "0") {
+      orderList.value = res.data || []
+    }
+  }).catch(err => {
+    showToast({
+      message: err.msg,
+      wordBreak: 'break-word',
+    })
+  }).finally(() => {
+    hasInit.value = true
+  })
+}
 </script>
 
 <style scoped lang="scss">

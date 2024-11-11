@@ -2,7 +2,9 @@
   <div class="address-detail">
     <div class="title">Добавить адрес</div>
 
-    <div class="map"></div>
+    <div class="map" id="map">
+
+    </div>
 
     <van-form class="address-form" label-align="top" @submit="onSubmit" scroll-to-error>
       <van-field
@@ -67,13 +69,45 @@
 </template>
 
 <script setup>
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 
 const form = ref({
   city: '',
   street: '',
   buildingNumber: ''
 })
+
+onMounted(() => {
+  initMap()
+});
+
+
+async function initMap() {
+  // The `ymaps3.ready` promise will be resolved when all the API components are loaded
+  await ymaps3.ready;
+
+  const {YMap, YMapDefaultSchemeLayer} = ymaps3;
+
+  // Map creation
+  const map = new YMap(
+    // Pass the link to the HTMLElement of the container
+    document.getElementById('map'),
+
+    // Pass the initialization parameters
+    {
+      location: {
+        // The map center coordinates
+        center: [25.229762, 55.289311],
+
+        // Zoom level
+        zoom: 10
+      }
+    }
+  );
+
+  // Add a layer to display the schematic map
+  map.addChild(new YMapDefaultSchemeLayer());
+}
 
 const onSubmit = (values) => {
   console.log('submit', values);
