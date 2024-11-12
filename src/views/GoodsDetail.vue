@@ -112,20 +112,11 @@
     </div>
     <PageFooter/>
 
-    <van-popup v-model:show="popupVisible" round position="bottom"
+    <van-popup v-model:show="popupVisible" round position="bottom" :z-index="2"
                :style="{ height: '50%' }" class="popup-box">
       <div class="top-line"></div>
 
-      <div class="text-32 font-bold mt-30">Адреса</div>
-
-      <div class="address-list">
-        <AddressItem fromPage="GoodsDetail" :address="item" v-for="(item, index) in addressList" :key="index">
-          <template #footer>
-            <van-button class="mt-i-8" type="primary" color="#F55266">Выбрать</van-button>
-          </template>
-        </AddressItem>
-      </div>
-      <div class="add-address flex-left" @click="gotoUrl()"><img src="../assets/add.png"/>Добавить адрес</div>
+      <AddressList :fromParam="{name: 'GoodsDetail',query:{id: productId,from:'address'}}" show-buy/>
     </van-popup>
   </div>
 </template>
@@ -133,13 +124,10 @@
 <script setup>
 import PageFooter from "@/components/PageFooter.vue";
 import {onMounted, ref} from "vue";
-import AddressItem from "@/components/AddressItem.vue";
-import {useRoute, useRouter} from "vue-router";
-import {user_address} from "@/api/api.js";
-import {showToast} from "vant";
+import AddressList from "@/views/AddressList.vue";
+import {useRoute} from "vue-router";
 
 const route = useRoute()
-const router = useRouter()
 const productId = Number(route.query.id || 0)
 
 const from = route.query.from || ''
@@ -211,44 +199,16 @@ const collapseList = [
 
 const popupVisible = ref(false)
 
-const addressList = ref([])
-
 onMounted(() => {
-  if (from === 'AddressDetail') {
+  if (from === 'address') {
     showAddress()
   }
 })
 
 function showAddress() {
   popupVisible.value = true
-  getAddressList()
 }
 
-function getAddressList() {
-  user_address({
-    limit: 100,
-    offset: 1,
-    userId: '1'
-  }).then(res => {
-    if (res.code === "0") {
-      addressList.value = res.data || []
-    }
-  }).catch(err => {
-    showToast({
-      message: err.msg,
-      wordBreak: 'break-word',
-    })
-  })
-}
-
-function gotoUrl() {
-  router.push({
-    name: 'AddressDetail',
-    query: {
-      from: 'GoodsDetail'
-    }
-  })
-}
 </script>
 
 <style scoped lang="scss">
@@ -258,10 +218,6 @@ function gotoUrl() {
 
 .mr-i-0 {
   margin-top: 0 !important;
-}
-
-.mt-i-8 {
-  margin-top: 8px !important;
 }
 
 .product-content {
@@ -436,28 +392,13 @@ function gotoUrl() {
 }
 
 .popup-box {
-  padding: 5px 34px 30px 34px;
+  padding: 5px 10px 10px 10px;
 
   .top-line {
     width: 50px;
     margin: 0 auto;
     border-bottom: 5px solid #222324;
     border-radius: 3px;
-  }
-
-  .address-list {
-    margin-top: 8px;
-  }
-
-  .add-address {
-    color: #222934;
-    margin-top: 34px;
-
-    img {
-      width: 16px;
-      height: 16px;
-      margin-right: 6px;
-    }
   }
 }
 </style>

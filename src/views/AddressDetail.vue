@@ -60,7 +60,7 @@
       />
 
       <div class="flex-left">
-        <van-button type="primary" color="#F55266" native-type="submit">Выбрать</van-button>
+        <van-button type="primary" color="#F55266" @click="cancel()">Выбрать</van-button>
         <van-button class="close-btn" type="primary" color="#EEF1F6" native-type="submit">Закрыть</van-button>
       </div>
     </van-form>
@@ -72,11 +72,9 @@
 import {onMounted, ref} from "vue";
 import {insert_address, upd_address} from "@/api/api.js";
 import {showToast} from "vant";
-import {useRoute, useRouter} from "vue-router";
+import {useRouter} from "vue-router";
 
-const route = useRoute();
 const router = useRouter()
-const fromList = route.query.from || 'AddressList'
 const detail = sessionStorage.getItem('addressDetail') || ''
 
 const form = ref({
@@ -129,15 +127,28 @@ async function initMap() {
   map.addChild(new YMapDefaultSchemeLayer());
 }
 
+
+function cancel() {
+  const fromParam = sessionStorage.getItem('fromParam')
+  let fromInfo = {
+    name: 'AddressList',
+    query: {}
+  }
+  if (fromParam) {
+    fromInfo = JSON.parse(fromParam)
+  }
+
+  router.push({
+    name: fromInfo.name,
+    query: fromInfo.query
+  })
+}
+
 const onSubmit = (values) => {
   if (form.value.id) {
     upd_address(form.value).then(res => {
       if (res.code === "0") {
-        // 返回地址来源页面
-        router.push({
-          name: fromList,
-          from: 'AddressDetail'
-        })
+        cancel()
       }
     }).catch(err => {
       showToast({
@@ -148,11 +159,7 @@ const onSubmit = (values) => {
   } else {
     insert_address(form.value).then(res => {
       if (res.code === "0") {
-        // 返回地址来源页面
-        router.push({
-          name: fromList,
-          from: 'AddressDetail'
-        })
+        cancel()
       }
     }).catch(err => {
       showToast({

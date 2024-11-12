@@ -31,6 +31,7 @@ import {
 } from 'vant'
 import 'vant/lib/index.css'
 import RU from 'vant/es/locale/lang/ru-RU';
+
 Locale.use('ru-RU', RU);
 
 const app = createApp(App)

@@ -6,12 +6,12 @@
         <div class="text-20 font-bold overflowText">My_NAME_IS_HAHAH</div>
         <div class="flex-left mt-8">
           <div class="mr-8">ID：123456789</div>
-          <van-button type="primary" color="#F55266">Ton Кошелек</van-button>
+          <!--          <div id="ton-connect"></div>-->
+          <van-button type="primary" color="#F55266" @click="connectWallet">Ton Кошелек</van-button>
         </div>
       </div>
     </div>
 
-    <div id="ton-connect"></div>
 
     <div class="menu-list">
       <div class="menu-item flex-left" v-for="(item, index) in menuList" :key="index" @click="gotoUrl(item.path)">
@@ -26,26 +26,12 @@
 <script setup>
 
 import TabBar from "@/components/TabBar.vue";
-import {onMounted, ref} from "vue";
+import {ref} from "vue";
 import {useRouter} from "vue-router";
-import {user_account} from "@/api/api.js";
-import {showToast} from "vant";
-import {TonConnectUI} from "@tonconnect/ui";
+import tonConnectUI from "@/ton/index.js";
 
 const router = useRouter();
 const activeTab = ref('person');
-
-onMounted(() => {
-  const tonConnectUI = new TonConnectUI({
-    manifestUrl: 'https://1233/tonconnect-manifest.json',
-    buttonRootId: 'ton-connect'
-  });
-
-  tonConnectUI.uiOptions = {
-    language: 'ru'
-  };
-})
-
 
 const menuList = [{
   title: 'Мой адрес',
@@ -61,25 +47,17 @@ const menuList = [{
   path: ''
 }]
 
-onMounted(() => {
-  // addUser()
-})
-
 function getImageUrl(url) {
   return new URL(url, import.meta.url).href;
 }
 
-function addUser() {
-  user_account({}).then(res => {
-    if (res.code === "0") {
-    }
-  }).catch(err => {
-    showToast({
-      message: err.msg,
-      wordBreak: 'break-word',
-    })
-  })
-}
+const connectWallet = async () => {
+  try {
+    const res = await tonConnectUI.openModal()
+  } catch (e) {
+    console.log(e)
+  }
+};
 
 function gotoUrl(path) {
   if (path) {
