@@ -21,11 +21,12 @@
         </div>
       </div>
 
-      <div class="product-price">${{productId === 1 ? '599.00' : '875.00'}} USDT</div>
+      <div class="product-price">${{ productId === 1 ? '599.00' : '875.00' }} USDT</div>
 
       <div class="flex-between mt-20">
-        <van-stepper v-model="productNum" :min="1" :max="99" button-size="44px" input-width="70px" integer class="mr-20 input-stepper"/>
-        <van-button type="primary" color="#F55266" @click="popupVisible = true">КУПИТЬ СЕЙЧАС</van-button>
+        <van-stepper v-model="productNum" :min="1" :max="99" button-size="44px" input-width="70px" integer
+                     class="mr-20 input-stepper"/>
+        <van-button type="primary" color="#F55266" @click="showAddress()">КУПИТЬ СЕЙЧАС</van-button>
       </div>
 
       <div class="product-desc">Время транспортировки составляет approximately 15-20 дней.</div>
@@ -118,25 +119,30 @@
       <div class="text-32 font-bold mt-30">Адреса</div>
 
       <div class="address-list">
-        <AddressItem v-for="(item, index) in addressList" :key="index">
+        <AddressItem fromPage="GoodsDetail" :address="item" v-for="(item, index) in addressList" :key="index">
           <template #footer>
             <van-button class="mt-i-8" type="primary" color="#F55266">Выбрать</van-button>
           </template>
         </AddressItem>
       </div>
-      <div class="add-address flex-left"><img src="../assets/add.png"/>Добавить адрес</div>
+      <div class="add-address flex-left" @click="gotoUrl()"><img src="../assets/add.png"/>Добавить адрес</div>
     </van-popup>
   </div>
 </template>
 
 <script setup>
 import PageFooter from "@/components/PageFooter.vue";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import AddressItem from "@/components/AddressItem.vue";
-import {useRoute} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
+import {user_address} from "@/api/api.js";
+import {showToast} from "vant";
 
 const route = useRoute()
+const router = useRouter()
 const productId = Number(route.query.id || 0)
+
+const from = route.query.from || ''
 
 const colors = [
   {
@@ -205,7 +211,44 @@ const collapseList = [
 
 const popupVisible = ref(false)
 
-const addressList = [1]
+const addressList = ref([])
+
+onMounted(() => {
+  if (from === 'AddressDetail') {
+    showAddress()
+  }
+})
+
+function showAddress() {
+  popupVisible.value = true
+  getAddressList()
+}
+
+function getAddressList() {
+  user_address({
+    limit: 100,
+    offset: 1,
+    userId: '1'
+  }).then(res => {
+    if (res.code === "0") {
+      addressList.value = res.data || []
+    }
+  }).catch(err => {
+    showToast({
+      message: err.msg,
+      wordBreak: 'break-word',
+    })
+  })
+}
+
+function gotoUrl() {
+  router.push({
+    name: 'AddressDetail',
+    query: {
+      from: 'GoodsDetail'
+    }
+  })
+}
 </script>
 
 <style scoped lang="scss">

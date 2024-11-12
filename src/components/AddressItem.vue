@@ -2,7 +2,7 @@
   <div class="address-list-item">
     <div class="flex-left">
       <div class="qi mr-10">Qi {{ address.phone }}</div>
-      <div class="line-under mr-16" @click="gotoUrl(address.id)">Редактировать</div>
+      <div class="line-under mr-16" @click="gotoUrl(address)">Редактировать</div>
       <div class="line-under" @click="delAddress(address.id)">Удалить</div>
     </div>
 
@@ -30,13 +30,18 @@ const props = defineProps({
     default: () => {
       return {}
     }
+  },
+  fromPage: {
+    type: String,
+    default: 'AddressList'
   }
 })
 
 const router = useRouter()
 
-function gotoUrl(id) {
-  router.push({name: 'AddressDetail', query: {id: 1}})
+function gotoUrl() {
+  sessionStorage.setItem('addressDetail', JSON.stringify(props.address))
+  router.push({name: 'AddressDetail', query: {from: props.fromPage}})
 }
 
 function delAddress(id) {

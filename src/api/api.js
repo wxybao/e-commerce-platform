@@ -20,10 +20,10 @@ export const user_address = (params) => {
   return request({ url: shopUrl + 'user_address/', method: 'get', params: params })
 }
 export const insert_address = (params) => {
-  return request({ url: shopUrl + 'user_address', method: 'post', data: params })
+  return request({ url: shopUrl + 'user_address/', method: 'post', data: params })
 }
 export const upd_address = (params) => {
-  return request({ url: shopUrl + 'user_address', method: 'put', params: params })
+  return request({ url: shopUrl + 'user_address/', method: 'put', data: params })
 }
 export const del_address = (params) => {
   return request({ url: shopUrl + 'user_address/' + params, method: 'delete' })

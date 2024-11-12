@@ -7,7 +7,7 @@
         <van-empty description="Адрес не добавлен."/>
       </template>
       <template v-else>
-        <AddressItem v-for="(item, index) in addressList" :key="index" :address="item" @del="delAddressList">
+        <AddressItem fromPage="AddressList" v-for="(item, index) in addressList" :key="index" :address="item" @del="delAddressList">
         </AddressItem>
       </template>
     </div>
@@ -59,7 +59,10 @@ function delAddressList(id) {
 
 function gotoUrl() {
   router.push({
-    name: 'AddressDetail'
+    name: 'AddressDetail',
+    query:{
+      from: 'AddressList'
+    }
   })
 }
 </script>

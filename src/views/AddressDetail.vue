@@ -20,26 +20,26 @@
         :rules="[{ required: true, message: 'Заполните улицу, пожалуйста.' }]"
       />
       <van-field
-        v-model="form.buildingNumber"
+        v-model="form.buildingNo"
         name="Номер здания"
         label="Номер здания"
         :rules="[{ required: true, message: 'Пожалуйста, заполните номер здания.' }]"
       />
       <div class="flex-left" style="gap: 24px">
         <van-field
-          v-model="form.buildingNumber"
+          v-model="form.unit"
           name="Квартира"
           label="Квартира"
           :rules="[{ required: true, message: 'Пожалуйста, заполните номер здания.' }]"
         />
         <van-field
-          v-model="form.buildingNumber"
+          v-model="form.buildingCall"
           name="Вызов в здание"
           label="Вызов в здание"
           :rules="[{ required: true, message: 'Пожалуйста, заполните номер здания.' }]"
         />
         <van-field
-          v-model="form.buildingNumber"
+          v-model="form.floor"
           name="Этаж"
           label="Этаж"
           :rules="[{ required: true, message: 'Пожалуйста, заполните номер здания.' }]"
@@ -47,13 +47,13 @@
       </div>
 
       <van-field
-        v-model="form.buildingNumber"
+        v-model="form.name"
         name="Имя"
         label="Имя"
         :rules="[{ required: true, message: 'Пожалуйста, заполните номер здания.' }]"
       />
       <van-field
-        v-model="form.buildingNumber"
+        v-model="form.phone"
         name="Телефон"
         label="Телефон"
         :rules="[{ required: true, message: 'Пожалуйста, заполните номер здания.' }]"
@@ -70,15 +70,35 @@
 
 <script setup>
 import {onMounted, ref} from "vue";
+import {insert_address, upd_address} from "@/api/api.js";
+import {showToast} from "vant";
+import {useRoute, useRouter} from "vue-router";
+
+const route = useRoute();
+const router = useRouter()
+const fromList = route.query.from || 'AddressList'
+const detail = sessionStorage.getItem('addressDetail') || ''
 
 const form = ref({
+  id: 0,
+  userId: '1',
   city: '',
   street: '',
-  buildingNumber: ''
+  buildingCall: '',
+  buildingNo: '',
+  floor: '',
+  name: '',
+  phone: '',
+  unit: ''
 })
 
+if (detail) {
+  form.value = JSON.parse(detail)
+  sessionStorage.removeItem('addressDetail')
+}
+
 onMounted(() => {
-  initMap()
+  // initMap()
 });
 
 
@@ -110,7 +130,37 @@ async function initMap() {
 }
 
 const onSubmit = (values) => {
-  console.log('submit', values);
+  if (form.value.id) {
+    upd_address(form.value).then(res => {
+      if (res.code === "0") {
+        // 返回地址来源页面
+        router.push({
+          name: fromList,
+          from: 'AddressDetail'
+        })
+      }
+    }).catch(err => {
+      showToast({
+        message: err.msg,
+        wordBreak: 'break-word',
+      })
+    })
+  } else {
+    insert_address(form.value).then(res => {
+      if (res.code === "0") {
+        // 返回地址来源页面
+        router.push({
+          name: fromList,
+          from: 'AddressDetail'
+        })
+      }
+    }).catch(err => {
+      showToast({
+        message: err.msg,
+        wordBreak: 'break-word',
+      })
+    })
+  }
 };
 </script>
 
