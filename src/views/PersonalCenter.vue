@@ -6,7 +6,7 @@
         <div class="text-20 font-bold overflowText">{{ userInfo?.username || '--' }}</div>
         <div class="flex-left mt-8">
           <div class="mr-8 flex-1 overflowText">ID：{{ userInfo?.id || '--' }}</div>
-          <div id="ton-connect"></div>
+          <!--          <div id="ton-connect"></div>-->
           <van-button type="primary" color="#F55266" @click="tonBtnClick()">
             {{ !hasConnect ? 'Подключить кошелёк' : 'Отключить кошелёк' }}
           </van-button>
@@ -34,6 +34,7 @@ import {storeToRefs} from "pinia";
 import axios from "axios";
 import {THEME} from "@tonconnect/ui";
 import {showConfirmDialog} from "vant";
+import {wallet_address} from "@/api/api.js";
 
 const userStore = useUserStore()
 const {userInfo} = storeToRefs(userStore)
@@ -72,11 +73,18 @@ onBeforeUnmount(() => {
 onMounted(() => {
   sub = tonConnectUI.onStatusChange(wallet => {
     hasConnect.value = tonConnectUI.connected
+
+    if (tonConnectUI.connected && wallet) {
+      wallet_address({
+        walletAddress: wallet.account.address,
+        id: userInfo.value?.id
+      })
+    }
   })
 
   hasConnect.value = tonConnectUI.connected
 
-  // console.log(tonConnectUI)
+  console.log(tonConnectUI)
   // tonConnectUI.uiOptions = {
   //   buttonRootId: 'ton-connect',
   //   language: 'ru',

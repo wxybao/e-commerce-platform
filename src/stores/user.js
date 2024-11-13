@@ -23,7 +23,12 @@ export const useUserStore = defineStore('user', {
     hasLogin: false
   }),
   getters: {
-    userInfo: state => state.user?.user
+    userInfo: state => {
+      return {
+        id: 1
+      }
+    }
+    // userInfo: state => state.user?.user
   },
   actions: {
   }

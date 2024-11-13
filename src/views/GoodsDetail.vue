@@ -130,7 +130,7 @@ import AddressList from "@/views/AddressList.vue";
 import {useRoute} from "vue-router";
 import NavBar from "@/components/NavBar.vue";
 import tonConnectUI from "@/ton/index.js";
-import {save_order} from "@/api/api.js";
+import {save_order, wallet_address} from "@/api/api.js";
 import {showToast} from "vant";
 import {useUserStore} from "@/stores/user.js";
 import {storeToRefs} from "pinia";
@@ -231,11 +231,15 @@ async function buyProduct(address) {
       const res = await tonConnectUI.openModal()
 
       const unsubscribe = tonConnectUI.onStatusChange((wallet) => {
-        console.log('wallet', wallet)
-        if (wallet) {
+        if (wallet && tonConnectUI.connected) {
+          wallet_address({
+            walletAddress: wallet.account.address,
+            id: userInfo.value?.id
+          })
+
           setTransaction()
 
-          // unsubscribe()
+          unsubscribe()
         }
       });
     } catch (e) {
@@ -271,6 +275,7 @@ async function setTransaction(address) {
   const img = await convertImageUrlToBase64(new URL(`../assets/goods-${productId}.png`, import.meta.url).href)
 
   save_order({
+    walletAddress: tonAddress,
     "color": colors[activeColor.value].name,
     "image": img,
     "price": productId === 1 ? 599.00 : 875.00,
@@ -284,9 +289,9 @@ async function setTransaction(address) {
         validUntil: Math.floor(Date.now() / 1000) + 60,
         messages: [
           {
-            address: "钱包地址给后端，后端会返回地址",
+            address: res.data.jettonWalletAddress,
             amount: "50000000",
-            payload: '钱包地址给后端，后端会返回'
+            payload: res.data.idBase64
           }
         ]
       }
