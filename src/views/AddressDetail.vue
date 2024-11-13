@@ -1,5 +1,6 @@
 <template>
   <div class="address-detail">
+    <NavBar/>
     <div class="title">Добавить адрес</div>
 
     <div class="map" id="map">
@@ -73,13 +74,19 @@ import {onMounted, ref} from "vue";
 import {insert_address, upd_address} from "@/api/api.js";
 import {showToast} from "vant";
 import {useRouter} from "vue-router";
+import NavBar from "@/components/NavBar.vue";
+import {useUserStore} from "@/stores/user.js";
+import {storeToRefs} from "pinia";
 
 const router = useRouter()
 const detail = sessionStorage.getItem('addressDetail') || ''
 
+const userStore = useUserStore()
+const {userInfo} = storeToRefs(userStore)
+
 const form = ref({
   id: 0,
-  userId: '1',
+  userId: userInfo.value?.id,
   city: '',
   street: '',
   buildingCall: '',

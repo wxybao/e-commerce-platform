@@ -1,5 +1,6 @@
 <template>
   <div class="detail">
+    <NavBar/>
     <div class="product-content">
       <div class="product-img">
         <template v-if="productId === 1"><img src="../assets/goods-1.png"/></template>
@@ -126,6 +127,7 @@ import PageFooter from "@/components/PageFooter.vue";
 import {onMounted, ref} from "vue";
 import AddressList from "@/views/AddressList.vue";
 import {useRoute} from "vue-router";
+import NavBar from "@/components/NavBar.vue";
 
 const route = useRoute()
 const productId = Number(route.query.id || 0)

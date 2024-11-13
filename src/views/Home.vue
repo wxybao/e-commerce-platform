@@ -124,29 +124,29 @@ const collapseList = ref([
 
 const lastList = ref([
   {
-    src: '../assets/home-last-1.png',
+    src: 'home-last-1.png',
     title: 'Бесплатная доставка по воздуху',
     desc: 'Бесплатная доставка по всем заказам'
   },
   {
-    src: '../assets/home-last-2.png',
+    src: 'home-last-2.png',
     title: '100% гарантия оплаты',
     desc: 'Мы обеспечиваем безопасную оплату с помощью PEV.'
   },
   {
-    src: '../assets/home-last-3.png',
+    src: 'home-last-3.png',
     title: 'Мы гарантируем безопасную оплату с PEV',
     desc: 'Просто верните его в течение 30 дней для обмена.'
   },
   {
-    src: '../assets/home-last-4.png',
+    src: 'home-last-4.png',
     title: 'Поддержка 24/7',
     desc: 'Свяжитесь с нами 24 часа в сутки, 7 дней в неделю'
   },
 ])
 
-function getImageUrl(url) {
-  return new URL(url, import.meta.url).href;
+function getImageUrl(filename) {
+  return new URL(`../assets/${filename}`, import.meta.url).href;
 }
 
 function gotoDetail(id) {

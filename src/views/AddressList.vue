@@ -1,5 +1,6 @@
 <template>
   <div class="address-list">
+    <NavBar/>
     <div class="title">Адреса</div>
 
     <div class="mt-8">
@@ -37,6 +38,9 @@ import {del_address, user_address} from "@/api/api.js";
 import {showConfirmDialog, showSuccessToast, showToast} from "vant";
 import {useRouter} from "vue-router";
 import tonConnectUI from "@/ton/index.js";
+import NavBar from "@/components/NavBar.vue";
+import {useUserStore} from "@/stores/user.js";
+import {storeToRefs} from "pinia";
 
 const props = defineProps({
   showBuy: {
@@ -51,6 +55,9 @@ const props = defineProps({
   }
 })
 
+const userStore = useUserStore()
+const {userInfo} = storeToRefs(userStore)
+
 const router = useRouter()
 const hasInit = ref(false)
 const addressList = ref([])
@@ -64,7 +71,7 @@ function getAddressList() {
   user_address({
     limit: 100,
     offset: pageIndex,
-    userId: '1'
+    userId: userInfo.value?.id || 0
   }).then(res => {
     if (res.code === "0") {
       addressList.value = res.data || []
@@ -126,16 +133,16 @@ async function buyClick() {
       validUntil: Math.floor(Date.now() / 1000) + 60, // 60 sec
       messages: [
         {
-          address: "EQBBJBB3HagsujBqVfqeDUPJ0kXjgTPLWPFFffuNXNiJL0aA",
-          amount: "0"
+          address: "钱包地址给后端，后端会返回地址",
+          amount: "50000000",
+          payload: '钱包地址给后端，后端会返回'
         }
       ]
     }
 
     try {
       const result = await tonConnectUI.sendTransaction(transaction);
-      const someTxData = await myAppExplorerService.getTransaction(result.boc);
-      // alert('Transaction was sent successfully', someTxData);
+
     } catch (e) {
       console.error(e);
     }

@@ -3,9 +3,9 @@
     <div class="user-info flex-left">
       <van-image round width="58px" height="58px" src=""/>
       <div class="flex-1 ml-16" style="width: 0">
-        <div class="text-20 font-bold overflowText">My_NAME_IS_HAHAH</div>
+        <div class="text-20 font-bold overflowText">{{ userInfo?.username || '--' }}</div>
         <div class="flex-left mt-8">
-          <div class="mr-8">ID：123456789</div>
+          <div class="mr-8">ID：{{ userInfo?.id || '--' }}</div>
           <!--          <div id="ton-connect"></div>-->
           <van-button type="primary" color="#F55266" @click="connectWallet">Ton Кошелек</van-button>
         </div>
@@ -26,29 +26,36 @@
 <script setup>
 
 import TabBar from "@/components/TabBar.vue";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import {useRouter} from "vue-router";
 import tonConnectUI from "@/ton/index.js";
+import {useUserStore} from "@/stores/user.js";
+import {storeToRefs} from "pinia";
+
+const userStore = useUserStore()
+const {userInfo} = storeToRefs(userStore)
+
+// const src = 'query_id=AAEmLCBAAwAAACYsIEA25unZ&user=%7B%22id%22%3A7518301222%2C%22first_name%22%3A%22Candice%22%2C%22last_name%22%3A%22%22%2C%22username%22%3A%22candicePenguin%22%2C%22language_code%22%3A%22zh-hans%22%2C%22allows_write_to_pm%22%3Atrue%7D&auth_date=1731408451&hash=a64d1b55d610243069f3815f517e4a63a0b1f24ec1fed40e3907fdfd406e2ebd'
 
 const router = useRouter();
 const activeTab = ref('person');
 
 const menuList = [{
   title: 'Мой адрес',
-  icon: '../assets/person-address.png',
+  icon: 'person-address.png',
   path: 'AddressList'
 }, {
   title: 'Мой заказ',
-  icon: '../assets/person-order.png',
+  icon: 'person-order.png',
   path: 'OrderList'
 }, {
   title: 'Служба поддержки клиентов',
-  icon: '../assets/person-chat.png',
+  icon: 'person-chat.png',
   path: ''
 }]
 
-function getImageUrl(url) {
-  return new URL(url, import.meta.url).href;
+function getImageUrl(filename) {
+  return new URL(`../assets/${filename}`, import.meta.url).href;
 }
 
 const connectWallet = async () => {

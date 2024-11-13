@@ -27,7 +27,8 @@ import {
   Field,
   Toast,
   Empty,
-  Dialog
+  Dialog,
+  NavBar
 } from 'vant'
 import 'vant/lib/index.css'
 import RU from 'vant/es/locale/lang/ru-RU';
@@ -61,5 +62,6 @@ app.use(Field)
 app.use(Toast)
 app.use(Empty)
 app.use(Dialog)
+app.use(NavBar)
 
 app.mount('#app')

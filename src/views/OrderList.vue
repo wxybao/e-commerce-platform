@@ -1,5 +1,6 @@
 <template>
   <div class="order-list">
+    <NavBar/>
     <div class="title">Заказы</div>
 
     <div class="orders">
@@ -39,6 +40,12 @@
 import {onMounted, ref} from "vue";
 import {sale_order} from "@/api/api.js";
 import {showToast} from "vant";
+import NavBar from "@/components/NavBar.vue";
+import {useUserStore} from "@/stores/user.js";
+import {storeToRefs} from "pinia";
+
+const userStore = useUserStore()
+const {userInfo} = storeToRefs(userStore)
 
 const orderList = ref([])
 const pageIndex = 1
@@ -52,7 +59,7 @@ function getOrderList() {
   sale_order({
     limit: 100,
     offset: pageIndex,
-    userId: '1'
+    userId: userInfo.value?.id || 0
   }).then(res => {
     if (res.code === "0") {
       orderList.value = res.data || []
