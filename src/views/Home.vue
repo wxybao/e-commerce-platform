@@ -83,7 +83,7 @@
 <script setup>
 import PageFooter from "@/components/PageFooter.vue";
 import TabBar from "@/components/TabBar.vue";
-import {ref} from "vue";
+import { ref} from "vue";
 import {useRouter} from "vue-router";
 
 const router = useRouter()

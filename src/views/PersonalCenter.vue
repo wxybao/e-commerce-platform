@@ -7,10 +7,12 @@
         <div class="flex-left mt-8">
           <div class="mr-8 flex-1 overflowText">ID：{{ userInfo?.id || '--' }}</div>
           <div id="ton-connect"></div>
+          <van-button type="primary" color="#F55266" @click="tonBtnClick()">
+            {{ !hasConnect ? 'Подключить кошелёк' : 'Отключить кошелёк' }}
+          </van-button>
         </div>
       </div>
     </div>
-
     <div class="menu-list">
       <div class="menu-item flex-left" v-for="(item, index) in menuList" :key="index" @click="gotoUrl(item.path)">
         <img :src="getImageUrl(item.icon)" alt="" width="24px" height="24px" class="mr-16">
@@ -24,13 +26,14 @@
 <script setup>
 
 import TabBar from "@/components/TabBar.vue";
-import {onMounted, ref} from "vue";
+import {onBeforeUnmount, onMounted, ref} from "vue";
 import {useRouter} from "vue-router";
 import tonConnectUI from "@/ton/index.js";
 import {useUserStore} from "@/stores/user.js";
 import {storeToRefs} from "pinia";
 import axios from "axios";
 import {THEME} from "@tonconnect/ui";
+import {showConfirmDialog} from "vant";
 
 const userStore = useUserStore()
 const {userInfo} = storeToRefs(userStore)
@@ -52,32 +55,63 @@ const menuList = [{
   path: ''
 }]
 
+const hasConnect = ref(false)
+
 function getImageUrl(filename) {
   return new URL(`../assets/${filename}`, import.meta.url).href;
 }
 
-onMounted(() => {
-  tonConnectUI.uiOptions = {
-    buttonRootId: 'ton-connect',
-    language: 'ru',
-    uiPreferences: {
-      borderRadius: 's',
-      colorsSet: {
-        [THEME.DARK]: {
-          connectButton: {
-            background: '#F55266'
-          }
-        },
-        [THEME.LIGHT]: {
-          connectButton: {
-            background: '#F55266'
-          }
-        }
-      }
-    }
+let sub = null
+
+onBeforeUnmount(() => {
+  if (sub) {
+    sub()
   }
+})
+
+onMounted(() => {
+  sub = tonConnectUI.onStatusChange(wallet => {
+    hasConnect.value = tonConnectUI.connected
+  })
+
+  hasConnect.value = tonConnectUI.connected
+
+  // console.log(tonConnectUI)
+  // tonConnectUI.uiOptions = {
+  //   buttonRootId: 'ton-connect',
+  //   language: 'ru',
+  //   uiPreferences: {
+  //     borderRadius: 's',
+  //     colorsSet: {
+  //       [THEME.DARK]: {
+  //         connectButton: {
+  //           background: '#F55266'
+  //         }
+  //       },
+  //       [THEME.LIGHT]: {
+  //         connectButton: {
+  //           background: '#F55266'
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
   getAvatar()
 })
+
+async function tonBtnClick() {
+  if (hasConnect.value) {
+    showConfirmDialog({
+      title: '',
+      message:
+        'Отключить кошелёк?',
+    }).then(() => {
+      tonConnectUI.disconnect()
+    })
+  } else {
+    await tonConnectUI.openModal()
+  }
+}
 
 async function getAvatar() {
   const token = '7826079215:AAHvxL69IRgyhhgJJjCsl5nadQumqP22DEI'
