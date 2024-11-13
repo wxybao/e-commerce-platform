@@ -61,8 +61,8 @@
       />
 
       <div class="flex-left">
-        <van-button type="primary" color="#F55266" @click="cancel()">Выбрать</van-button>
-        <van-button class="close-btn" type="primary" color="#EEF1F6" native-type="submit">Закрыть</van-button>
+        <van-button type="primary" color="#F55266" native-type="submit">Выбрать</van-button>
+        <van-button class="close-btn" type="primary" color="#EEF1F6" @click="cancel()">Закрыть</van-button>
       </div>
     </van-form>
 
@@ -70,7 +70,7 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from "vue";
+import {onBeforeUnmount, onMounted, ref} from "vue";
 import {insert_address, upd_address} from "@/api/api.js";
 import {showToast} from "vant";
 import {useRouter} from "vue-router";
@@ -105,6 +105,10 @@ if (detail) {
 onMounted(() => {
   // initMap()
 });
+
+onBeforeUnmount(() => {
+  sessionStorage.removeItem('fromParam')
+})
 
 
 async function initMap() {
@@ -143,9 +147,10 @@ function cancel() {
   }
   if (fromParam) {
     fromInfo = JSON.parse(fromParam)
+    sessionStorage.setItem('fromAddress', 1)
   }
-
-  router.push({
+  console.log(fromInfo)
+  router.replace({
     name: fromInfo.name,
     query: fromInfo.query
   })
@@ -159,7 +164,7 @@ const onSubmit = (values) => {
       }
     }).catch(err => {
       showToast({
-        message: err.msg,
+        message: err.msg || 'провал',
         wordBreak: 'break-word',
       })
     })
@@ -170,7 +175,7 @@ const onSubmit = (values) => {
       }
     }).catch(err => {
       showToast({
-        message: err.msg,
+        message: err.msg || 'провал',
         wordBreak: 'break-word',
       })
     })

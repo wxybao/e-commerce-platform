@@ -1,17 +1,15 @@
 <template>
   <div class="person">
     <div class="user-info flex-left">
-      <van-image round width="58px" height="58px" src=""/>
+      <van-image round width="58px" height="58px" :src="userInfo?.avatar"/>
       <div class="flex-1 ml-16" style="width: 0">
         <div class="text-20 font-bold overflowText">{{ userInfo?.username || '--' }}</div>
         <div class="flex-left mt-8">
-          <div class="mr-8">ID：{{ userInfo?.id || '--' }}</div>
-          <!--          <div id="ton-connect"></div>-->
-          <van-button type="primary" color="#F55266" @click="connectWallet">Ton Кошелек</van-button>
+          <div class="mr-8 flex-1 overflowText">ID：{{ userInfo?.id || '--' }}</div>
+          <div id="ton-connect"></div>
         </div>
       </div>
     </div>
-
 
     <div class="menu-list">
       <div class="menu-item flex-left" v-for="(item, index) in menuList" :key="index" @click="gotoUrl(item.path)">
@@ -31,11 +29,11 @@ import {useRouter} from "vue-router";
 import tonConnectUI from "@/ton/index.js";
 import {useUserStore} from "@/stores/user.js";
 import {storeToRefs} from "pinia";
+import axios from "axios";
+import {THEME} from "@tonconnect/ui";
 
 const userStore = useUserStore()
 const {userInfo} = storeToRefs(userStore)
-
-// const src = 'query_id=AAEmLCBAAwAAACYsIEA25unZ&user=%7B%22id%22%3A7518301222%2C%22first_name%22%3A%22Candice%22%2C%22last_name%22%3A%22%22%2C%22username%22%3A%22candicePenguin%22%2C%22language_code%22%3A%22zh-hans%22%2C%22allows_write_to_pm%22%3Atrue%7D&auth_date=1731408451&hash=a64d1b55d610243069f3815f517e4a63a0b1f24ec1fed40e3907fdfd406e2ebd'
 
 const router = useRouter();
 const activeTab = ref('person');
@@ -58,13 +56,57 @@ function getImageUrl(filename) {
   return new URL(`../assets/${filename}`, import.meta.url).href;
 }
 
-const connectWallet = async () => {
-  try {
-    const res = await tonConnectUI.openModal()
-  } catch (e) {
-    console.log(e)
+onMounted(() => {
+  tonConnectUI.uiOptions = {
+    buttonRootId: 'ton-connect',
+    language: 'ru',
+    uiPreferences: {
+      borderRadius: 's',
+      colorsSet: {
+        [THEME.DARK]: {
+          connectButton: {
+            background: '#F55266'
+          }
+        },
+        [THEME.LIGHT]: {
+          connectButton: {
+            background: '#F55266'
+          }
+        }
+      }
+    }
   }
-};
+  getAvatar()
+})
+
+async function getAvatar() {
+  const token = '7826079215:AAHvxL69IRgyhhgJJjCsl5nadQumqP22DEI'
+  const res = await axios.get(`https://api.telegram.org/bot${token}/getUserProfilePhotos`, {
+    params: {
+      user_id: userInfo.value?.id
+    }
+  })
+
+  console.log(res)
+
+  const photos = res.data.result.photos || []
+  if (photos.length) {
+    const fileId = photos[0][0].file_id
+
+    const file = await axios.get(`https://api.telegram.org/bot${token}/getFile`, {
+      params: {
+        file_id: fileId
+      }
+    })
+
+    console.log(file)
+
+    const file_path = file.data.result.file_path
+
+    // 拼接头像地址
+    userInfo.value.avatar = `https://api.telegram.org/file/bot${token}/${file_path}`
+  }
+}
 
 function gotoUrl(path) {
   if (path) {

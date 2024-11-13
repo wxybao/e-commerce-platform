@@ -1,6 +1,6 @@
 <template>
   <div class="address-list">
-    <NavBar/>
+    <NavBar v-if="!showBuy"/>
     <div class="title">Адреса</div>
 
     <div class="mt-8">
@@ -23,7 +23,7 @@
             <li> Вызов в здание：{{ address.buildingCall }}</li>
           </ul>
 
-          <van-button v-if="showBuy" class="mt-i-8" type="primary" color="#F55266" @click="buyClick()">Выбрать
+          <van-button v-if="showBuy" class="mt-i-8" type="primary" color="#F55266" @click="buyClick(address)">Выбрать
           </van-button>
         </div>
       </template>
@@ -37,7 +37,6 @@ import {onMounted, ref} from "vue";
 import {del_address, user_address} from "@/api/api.js";
 import {showConfirmDialog, showSuccessToast, showToast} from "vant";
 import {useRouter} from "vue-router";
-import tonConnectUI from "@/ton/index.js";
 import NavBar from "@/components/NavBar.vue";
 import {useUserStore} from "@/stores/user.js";
 import {storeToRefs} from "pinia";
@@ -55,6 +54,7 @@ const props = defineProps({
   }
 })
 
+const emits = defineEmits(['buyClick'])
 const userStore = useUserStore()
 const {userInfo} = storeToRefs(userStore)
 
@@ -125,34 +125,8 @@ function gotoUrl(detail) {
   })
 }
 
-async function buyClick() {
-  const currentIsConnectedStatus = tonConnectUI.connected;
-
-  if (currentIsConnectedStatus) {
-    const transaction = {
-      validUntil: Math.floor(Date.now() / 1000) + 60, // 60 sec
-      messages: [
-        {
-          address: "钱包地址给后端，后端会返回地址",
-          amount: "50000000",
-          payload: '钱包地址给后端，后端会返回'
-        }
-      ]
-    }
-
-    try {
-      const result = await tonConnectUI.sendTransaction(transaction);
-
-    } catch (e) {
-      console.error(e);
-    }
-  } else {
-    try {
-      const res = await tonConnectUI.openModal()
-    } catch (e) {
-      console.log(e)
-    }
-  }
+function buyClick(address) {
+  emits('buyClick',address)
 }
 </script>
 

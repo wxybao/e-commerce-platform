@@ -11,7 +11,10 @@
 </template>
 
 <script setup>
-const onClickLeft = () => history.back()
+import {useRouter} from "vue-router";
+
+const router = useRouter()
+const onClickLeft = () => router.back()
 </script>
 
 <style scoped lang="scss">

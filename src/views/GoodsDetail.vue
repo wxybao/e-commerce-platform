@@ -117,7 +117,8 @@
                :style="{ height: '50%' }" class="popup-box">
       <div class="top-line"></div>
 
-      <AddressList :fromParam="{name: 'GoodsDetail',query:{id: productId,from:'address'}}" show-buy/>
+      <AddressList :fromParam="{name: 'GoodsDetail',query:{id: productId}}" show-buy
+                   @buy-click="buyProduct"/>
     </van-popup>
   </div>
 </template>
@@ -128,11 +129,19 @@ import {onMounted, ref} from "vue";
 import AddressList from "@/views/AddressList.vue";
 import {useRoute} from "vue-router";
 import NavBar from "@/components/NavBar.vue";
+import tonConnectUI from "@/ton/index.js";
+import {save_order} from "@/api/api.js";
+import {showToast} from "vant";
+import {useUserStore} from "@/stores/user.js";
+import {storeToRefs} from "pinia";
 
 const route = useRoute()
 const productId = Number(route.query.id || 0)
 
-const from = route.query.from || ''
+const userStore = useUserStore()
+const {userInfo} = storeToRefs(userStore)
+
+const from = sessionStorage.getItem('fromAddress') || ''
 
 const colors = [
   {
@@ -202,13 +211,98 @@ const collapseList = [
 const popupVisible = ref(false)
 
 onMounted(() => {
-  if (from === 'address') {
+  if (from) {
+    sessionStorage.removeItem('fromAddress')
     showAddress()
   }
 })
 
 function showAddress() {
   popupVisible.value = true
+}
+
+async function buyProduct(address) {
+  const currentIsConnectedStatus = tonConnectUI.connected;
+
+  if (currentIsConnectedStatus) {
+    setTransaction(address)
+  } else {
+    try {
+      const res = await tonConnectUI.openModal()
+
+      const unsubscribe = tonConnectUI.onStatusChange((wallet) => {
+        console.log('wallet', wallet)
+        if (wallet) {
+          setTransaction()
+
+          // unsubscribe()
+        }
+      });
+    } catch (e) {
+      console.log(e)
+    }
+  }
+}
+
+function convertImageUrlToBase64(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.setAttribute('crossOrigin', 'anonymous'); // 处理跨域问题
+    img.onload = function () {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const dataURL = canvas.toDataURL('image/png');
+      resolve(dataURL);
+    };
+    img.onerror = function (error) {
+      reject(error);
+    };
+    img.src = url;
+  });
+}
+
+async function setTransaction(address) {
+  const currentAccount = tonConnectUI.account;
+  const tonAddress = currentAccount?.address
+
+  const img = await convertImageUrlToBase64(new URL(`../assets/goods-${productId}.png`, import.meta.url).href)
+
+  save_order({
+    "color": colors[activeColor.value].name,
+    "image": img,
+    "price": productId === 1 ? 599.00 : 875.00,
+    "productName": productId === 1 ? 'Повышенной проходимости gokart' : 'Повышенной проходимости gokart (pro)',
+    "qty": productNum.value,
+    "userAddressId": address.id,
+    "userId": userInfo.value?.id
+  }).then(async res => {
+    if (res.code === '0') {
+      const transaction = {
+        validUntil: Math.floor(Date.now() / 1000) + 60,
+        messages: [
+          {
+            address: "钱包地址给后端，后端会返回地址",
+            amount: "50000000",
+            payload: '钱包地址给后端，后端会返回'
+          }
+        ]
+      }
+
+      try {
+        const result = await tonConnectUI.sendTransaction(transaction);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }).catch(err => {
+    showToast({
+      message: err.msg,
+      wordBreak: 'break-word',
+    })
+  })
 }
 
 </script>
@@ -394,9 +488,15 @@ function showAddress() {
 }
 
 .popup-box {
-  padding: 5px 10px 10px 10px;
+  padding: 15px 10px 10px 10px;
 
   .top-line {
+    background: #FFFFFF;
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    top: calc(50% + 5px);
     width: 50px;
     margin: 0 auto;
     border-bottom: 5px solid #222324;
