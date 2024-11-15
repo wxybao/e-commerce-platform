@@ -12,7 +12,7 @@
           <img :src="item.image"/>
           <van-row class="mt-16">
             <van-col span="12" class="item-label">Заказ #</van-col>
-            <van-col span="12" class="item-content">{{ item.id }}</van-col>
+            <van-col span="12" class="item-content">{{ item.productName }}</van-col>
           </van-row>
           <van-row class="mt-16">
             <van-col span="12" class="item-label">Цвет</van-col>

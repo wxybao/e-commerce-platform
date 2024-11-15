@@ -237,7 +237,7 @@ async function buyProduct(address) {
             id: userInfo.value?.id
           })
 
-          setTransaction()
+          setTransaction(address)
 
           unsubscribe()
         }
@@ -357,16 +357,16 @@ async function setTransaction(address) {
       &:after {
         content: '';
         position: absolute;
-        top: 2.5px;
-        left: 2.5px;
+        top: 50%;
+        left: 50%;
         width: 14px;
         height: 14px;
         border-radius: 50%;
         background: var(--color);
+        transform: translate(-50%,-50%);
       }
 
       &.active {
-        padding: 3px;
         border: 1px solid var(--color);
       }
     }

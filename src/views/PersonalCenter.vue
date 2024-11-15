@@ -63,7 +63,7 @@ function getImageUrl(filename) {
 }
 
 let sub = null
-
+let sub2 = null
 onBeforeUnmount(() => {
   if (sub) {
     sub()
@@ -73,18 +73,10 @@ onBeforeUnmount(() => {
 onMounted(() => {
   sub = tonConnectUI.onStatusChange(wallet => {
     hasConnect.value = tonConnectUI.connected
-
-    if (tonConnectUI.connected && wallet) {
-      wallet_address({
-        walletAddress: wallet.account.address,
-        id: userInfo.value?.id
-      })
-    }
   })
 
   hasConnect.value = tonConnectUI.connected
 
-  console.log(tonConnectUI)
   // tonConnectUI.uiOptions = {
   //   buttonRootId: 'ton-connect',
   //   language: 'ru',
@@ -118,6 +110,17 @@ async function tonBtnClick() {
     })
   } else {
     await tonConnectUI.openModal()
+
+    sub2 = tonConnectUI.onStatusChange((wallet) => {
+      if (wallet && tonConnectUI.connected) {
+        wallet_address({
+          walletAddress: wallet.account.address,
+          id: userInfo.value?.id
+        })
+
+        sub2()
+      }
+    })
   }
 }
 
@@ -129,8 +132,6 @@ async function getAvatar() {
     }
   })
 
-  console.log(res)
-
   const photos = res.data.result.photos || []
   if (photos.length) {
     const fileId = photos[0][0].file_id
@@ -140,8 +141,6 @@ async function getAvatar() {
         file_id: fileId
       }
     })
-
-    console.log(file)
 
     const file_path = file.data.result.file_path
 
@@ -177,6 +176,7 @@ function gotoUrl(path) {
       color: #222324;
       font-size: 20px;
       font-weight: bold;
+      cursor: pointer;
 
       img {
         width: 30px;

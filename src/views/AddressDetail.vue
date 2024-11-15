@@ -3,9 +3,9 @@
     <NavBar/>
     <div class="title">Добавить адрес</div>
 
-    <div class="map" id="map">
+<!--    <div class="map" id="map">-->
 
-    </div>
+<!--    </div>-->
 
     <van-form class="address-form" label-align="top" @submit="onSubmit" scroll-to-error>
       <van-field

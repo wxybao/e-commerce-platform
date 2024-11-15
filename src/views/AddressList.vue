@@ -20,7 +20,7 @@
             <li>Улица：{{ address.street }}</li>
             <li>Номер здания：{{ address.buildingNo }}</li>
             <li>Единица：{{ address.unit }}</li>
-            <li> Вызов в здание：{{ address.buildingCall }}</li>
+            <li>Вызов в здание：{{ address.buildingCall }}</li>
           </ul>
 
           <van-button v-if="showBuy" class="mt-i-8" type="primary" color="#F55266" @click="buyClick(address)">Выбрать
