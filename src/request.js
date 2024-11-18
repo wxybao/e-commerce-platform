@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const service = axios.create({
   // baseURL: '/api',
-  baseURL: 'http://39.101.176.90:8090',
+  baseURL: 'https://www.xjtd.store',
   withCredentials: true,
   timeout: 5000,
   headers: {'Content-Type': 'application/json'}

@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@2gis/mapgl": "^1.53.0",
     "@tonconnect/ui": "^2.0.9",
     "axios": "^1.7.7",
     "pinia": "^2.2.6",

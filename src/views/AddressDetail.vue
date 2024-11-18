@@ -3,47 +3,48 @@
     <NavBar/>
     <div class="title">Добавить адрес</div>
 
-<!--    <div class="map" id="map">-->
-
-<!--    </div>-->
+    <div class="map" id="map"></div>
 
     <van-form class="address-form" label-align="top" @submit="onSubmit" scroll-to-error>
       <van-field
         v-model="form.city"
         name="Город"
         label="Город"
-        :rules="[{ required: true, message: 'Заполните имя пользователя.' }]"
+        @blur="addressChange()"
+        :rules="[{ required: true, message: 'Пожалуйста, заполните.' }]"
       />
       <van-field
         v-model="form.street"
         name="Улица"
         label="Улица"
-        :rules="[{ required: true, message: 'Заполните улицу, пожалуйста.' }]"
+        @blur="addressChange()"
+        :rules="[{ required: true, message: 'Пожалуйста, заполните.' }]"
       />
       <van-field
         v-model="form.buildingNo"
         name="Номер здания"
         label="Номер здания"
-        :rules="[{ required: true, message: 'Пожалуйста, заполните номер здания.' }]"
+        @blur="addressChange()"
+        :rules="[{ required: true, message: 'Пожалуйста, заполните.' }]"
       />
       <div class="flex-left" style="gap: 24px">
         <van-field
           v-model="form.unit"
           name="Квартира"
           label="Квартира"
-          :rules="[{ required: true, message: 'Пожалуйста, заполните номер здания.' }]"
+          :rules="[{ required: true, message: 'Пожалуйста, заполните.' }]"
         />
         <van-field
           v-model="form.buildingCall"
           name="Вызов в здание"
           label="Вызов в здание"
-          :rules="[{ required: true, message: 'Пожалуйста, заполните номер здания.' }]"
+          :rules="[{ required: true, message: 'Пожалуйста, заполните.' }]"
         />
         <van-field
           v-model="form.floor"
           name="Этаж"
           label="Этаж"
-          :rules="[{ required: true, message: 'Пожалуйста, заполните номер здания.' }]"
+          :rules="[{ required: true, message: 'Пожалуйста, заполните.' }]"
         />
       </div>
 
@@ -51,13 +52,13 @@
         v-model="form.name"
         name="Имя"
         label="Имя"
-        :rules="[{ required: true, message: 'Пожалуйста, заполните номер здания.' }]"
+        :rules="[{ required: true, message: 'Пожалуйста, заполните.' }]"
       />
       <van-field
         v-model="form.phone"
         name="Телефон"
         label="Телефон"
-        :rules="[{ required: true, message: 'Пожалуйста, заполните номер здания.' }]"
+        :rules="[{ required: true, message: 'Пожалуйста, заполните.' }]"
       />
 
       <div class="flex-left">
@@ -77,6 +78,7 @@ import {useRouter} from "vue-router";
 import NavBar from "@/components/NavBar.vue";
 import {useUserStore} from "@/stores/user.js";
 import {storeToRefs} from "pinia";
+import {load} from "@2gis/mapgl";
 
 const router = useRouter()
 const detail = sessionStorage.getItem('addressDetail') || ''
@@ -103,41 +105,133 @@ if (detail) {
 }
 
 onMounted(() => {
-  // initMap()
+  initMap()
 });
 
 onBeforeUnmount(() => {
   sessionStorage.removeItem('fromParam')
+
+  if (map) {
+    map.destroy()
+  }
+  if (marker) {
+    marker.destroy()
+  }
 })
 
+// 初始化地图
+let map = null
+let marker = null
+const apiKey = 'd9156309-558c-4359-bfaf-054b5da42c08';
 
+// 初始化地图
 async function initMap() {
-  // The `ymaps3.ready` promise will be resolved when all the API components are loaded
-  await ymaps3.ready;
+  const mapglAPI = await load()
+  let defaultCenter = [37.6173, 55.7558]
+  map = new mapglAPI.Map('map', {
+    center: defaultCenter,// 莫斯科
+    zoom: 13,
+    key: apiKey,
+    lang: "ru",
+  });
 
-  const {YMap, YMapDefaultSchemeLayer} = ymaps3;
+  map.on("click", handleMapClick)
 
-  // Map creation
-  const map = new YMap(
-    // Pass the link to the HTMLElement of the container
-    document.getElementById('map'),
+  marker = new mapgl.Marker(map, {
+    coordinates: defaultCenter
+  });
 
-    // Pass the initialization parameters
-    {
-      location: {
-        // The map center coordinates
-        center: [25.229762, 55.289311],
+  if (!navigator.geolocation) {
+    // showToast('Геолокация не поддерживается в вашем браузере')
+    return
+  }
 
-        // Zoom level
-        zoom: 10
-      }
-    }
-  );
+  // 浏览器读取位置获取当前地址信息
+  navigator.geolocation.getCurrentPosition(async position => {
+    const {latitude, longitude} = position.coords;
+    const center = [longitude, latitude];
 
-  // Add a layer to display the schematic map
-  map.addChild(new YMapDefaultSchemeLayer());
+    map.setCenter(center)
+
+    marker.setCoordinates(center)
+  }, error => {
+    // showToast('Не удалось определить ваше местонахождение')
+  })
+
 }
 
+// 地图点击事件处理函数
+const handleMapClick = (event) => {
+  const coordinates = event.lngLat; // 获取点击的经纬度 [经度, 纬度]
+
+  // 更新或创建标记
+  if (!marker) {
+    marker = new mapgl.Marker(map, {coordinates});
+  } else {
+    marker.setCoordinates(coordinates);
+  }
+
+  // 获取地址信息
+  fetchLocationDetailsOrCoordinates(coordinates).then(address => {
+
+  });
+};
+
+// 获取经纬度或者地址信息的函数
+const fetchLocationDetailsOrCoordinates = async (param) => {
+  if (!param) {
+    return null
+  }
+  let url = null
+
+  // 如果param是字符串则是获取坐标
+  if (typeof param === 'string') {
+    url = `https://catalog.api.2gis.com/3.0/items/geocode?q=${encodeURIComponent(param)}&key=${apiKey}`
+  } else {
+    const [lng, lat] = param;
+    url = `https://catalog.api.2gis.com/3.0/items/geocode?lon=${lng}&lat=${lat}&key=${apiKey}`;
+  }
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    if (data && data.result && data.result.items.length > 0) {
+      console.log(data.result)
+      if (typeof param === 'string') {
+        const {lat, lon} = data.result.items[0].point;
+        return {lat, lon};
+      } else {
+        const address = data.result.items[0].full_name;
+        return address;
+      }
+    } else {
+      return null
+    }
+  } catch (error) {
+    return null
+  }
+};
+
+// 地址改变时需要联动地图
+function addressChange() {
+  let address = `${form.value.city}|${form.value.street}|${form.value.buildingNo}|${form.value.unit}|${form.value.buildingCall}|${form.value.floor}`
+
+  // 把|换成，并且去除连续的，以及开头结尾的，
+  address = address.replace(/\|/g, '，').replace(/，{2,}/g, '，').replace(/^，|，$/g, '')
+
+
+  console.log(address)
+  if (!address) {
+    return
+  }
+  fetchLocationDetailsOrCoordinates(address).then((coords) => {
+    if (coords) {
+      const center = [coords.lon, coords.lat]
+      map.setCenter(center)
+      marker.setCoordinates(center)
+    }
+  });
+}
 
 function cancel() {
   const fromParam = sessionStorage.getItem('fromParam')
