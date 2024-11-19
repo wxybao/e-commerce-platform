@@ -53,7 +53,7 @@ const menuList = [{
 }, {
   title: 'Служба поддержки клиентов',
   icon: 'person-chat.png',
-  path: ''
+  path: 'https://t.me/RedRocketSupport'
 }]
 
 const hasConnect = ref(false)
@@ -151,7 +151,11 @@ async function getAvatar() {
 
 function gotoUrl(path) {
   if (path) {
-    router.push({name: path})
+    if (path.indexOf('http') === 0) {
+      window.open(path, '_blank')
+    } else {
+      router.push({name: path})
+    }
   }
 }
 </script>

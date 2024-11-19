@@ -48,7 +48,9 @@
           <div class="collapse-text-box">
             <div class="collapse-text-box-bg">
               <div v-if="item.name === '1'">
-                <div class="collapse-text-box-img mr-i-0"></div>
+                <div class="collapse-text-box-img mr-i-0 height-full">
+                  <img src="../assets/collapse-1-1.png"/>
+                </div>
                 <div class="collapse-text-box-desc font-bold">90cc двухтактный двигатель, обеспечивающий 2.5 лошадиные
                   силы и способный развивать максимальную скорость до 45 км/ч. Вы можете настроить его, установив ваш
                   предпочтительный двигатель.
@@ -56,7 +58,9 @@
               </div>
 
               <div v-if="item.name === '2'">
-                <div class="collapse-text-box-img mr-i-0"></div>
+                <div class="collapse-text-box-img mr-i-0 height-full">
+                  <img src="../assets/collapse-2-1.png"/>
+                </div>
                 <div class="collapse-text-box-desc font-bold">Улучшенная передняя подвеска без труда поглощает каждую
                   неровность, обеспечивая стабильную и захватывающую поездку по любой местности.
                 </div>
@@ -76,14 +80,18 @@
             <div class="collapse-text-box-bg">
               <div class="">Добро пожаловать на</div>
               <a href="https://www.rocketkarting.com">www.rocketkarting.com</a>
-              <div class="collapse-text-box-img"></div>
+              <div class="collapse-text-box-img">
+                <img src="../assets/collapse-3-1.png"/>
+              </div>
               <div class="collapse-text-box-desc">
                 На обширной местности каждый любитель приключений мечтает о картинге, который не ограничен гладкими
                 трассами. И так появился Off-Road Pioneer — бренд, посвященный предоставлению всем незабываемого
                 внедорожного опыта.
               </div>
 
-              <div class="collapse-text-box-img"></div>
+              <div class="collapse-text-box-img">
+                <img src="../assets/collapse-3-2.png"/>
+              </div>
               <div class="collapse-text-box-desc">
                 Наша история началась с группы инженеров и дизайнеров, увлеченных внедорожьем. Они были недовольны
                 традиционными картингами, которые могли работать только на специализированных трассах и не могли
@@ -91,7 +99,9 @@
                 способное покорять любую местность — будь то грязные тропы, каменистые участки или обширные песчаные
                 дюны.
               </div>
-              <div class="collapse-text-box-img"></div>
+              <div class="collapse-text-box-img">
+                <img src="../assets/collapse-3-3.png"/>
+              </div>
               <div class="collapse-text-box-desc">
                 В Off-Road Kart мы верим, что настоящее приключение означает бесстрашное преодоление всех трудностей.
                 Именно поэтому наши картинги отличаются инновационным дизайном и прочными материалами, что гарантирует,
@@ -99,7 +109,9 @@
                 Независимо от того, пересекаете ли вы леса или исследуете дикую природу, наши картинги обеспечивают
                 неповторимое удовольствие от вождения.
               </div>
-              <div class="collapse-text-box-img"></div>
+              <div class="collapse-text-box-img">
+                <img src="../assets/collapse-3-4.png"/>
+              </div>
               <div class="collapse-text-box-desc">
                 Мы также стремимся сделать высококачественные внедорожные картинги доступными по самым разумным ценам.
                 Будучи прямым производителем, мы исключаем посредников и передаем экономию вам, обеспечивая наилучшее
@@ -107,7 +119,9 @@
                 адаптировать транспортное средство под ваши потребности и стиль вождения, раскрывая ваше полное
                 стремление к скорости и мощи.
               </div>
-              <div class="collapse-text-box-img"></div>
+              <div class="collapse-text-box-img">
+                <img src="../assets/collapse-3-5.png"/>
+              </div>
               <div class="collapse-text-box-desc">
                 Каждый картинг Off-Road Kart воплощает нашу страсть к внедорожью и нашу преданность приключениям.
                 Независимо от того, являетесь ли вы любителем острых ощущений или предпочитаете размеренную езду, мы
@@ -151,23 +165,22 @@ const {userInfo} = storeToRefs(userStore)
 
 const from = sessionStorage.getItem('fromAddress') || ''
 
-const colors = [
-  {
-    color: '#5A7AA1',
-    name: 'Blue',
-  }, {
-    color: '#EE7976',
-    name: 'Red',
-  }, {
-    color: '#9ACBF1',
-    name: 'Light Blue',
-  }, {
-    color: '#202732',
-    name: 'Black',
-  }]
 const activeColor = ref(0)
 
 const productNum = ref(1)
+
+let colors = []
+if (productId === 1) {
+  colors = [{
+    color: '#5A7AA1',
+    name: 'Blue',
+  }]
+} else {
+  colors = [{
+    color: '#EE7976',
+    name: 'Red',
+  }]
+}
 
 const descList = [
   {
@@ -436,7 +449,7 @@ async function setTransaction(address) {
   }
 }
 
-.title{
+.title {
   color: #181D25;
   text-align: center;
   font-size: 20px;
@@ -500,9 +513,19 @@ async function setTransaction(address) {
 
     &-img {
       width: 100%;
-      height: 173px;
+      height: 197px;
       margin-top: 12px;
       background: #EDEDED;
+      object-fit: cover;
+
+      &.height-full {
+        height: 100%;
+      }
+
+      img {
+        width: 100%;
+        height: 100%;
+      }
     }
 
     &-desc {

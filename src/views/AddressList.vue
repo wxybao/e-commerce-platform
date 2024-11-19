@@ -10,7 +10,7 @@
       <template v-else>
         <div class="address-list-item" v-for="address in addressList" :key="address.id">
           <div class="flex-left">
-            <div class="qi mr-10">Qi {{ address.phone }}</div>
+            <div class="qi mr-10">{{address.name}} {{ address.phone }}</div>
             <div class="line-under mr-16" @click="gotoUrl(address)">Редактировать</div>
             <div class="line-under" @click="delAddressList(address.id)">Удалить</div>
           </div>
@@ -61,7 +61,7 @@ const {userInfo} = storeToRefs(userStore)
 const router = useRouter()
 const hasInit = ref(false)
 const addressList = ref([])
-const pageIndex = 1
+const pageIndex = 0
 
 onMounted(() => {
   getAddressList()

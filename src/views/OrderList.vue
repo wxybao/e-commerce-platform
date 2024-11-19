@@ -28,7 +28,7 @@
           </van-row>
           <van-row class="mt-16">
             <van-col span="12" class="item-label">Итог</van-col>
-            <van-col span="12" class="item-content">${{ item.price }} USDT</van-col>
+            <van-col span="12" class="item-content">${{ item.money }} USDT</van-col>
           </van-row>
         </div>
       </template>
@@ -48,7 +48,7 @@ const userStore = useUserStore()
 const {userInfo} = storeToRefs(userStore)
 
 const orderList = ref([])
-const pageIndex = 1
+const pageIndex = 0
 const hasInit = ref(false)
 
 onMounted(() => {

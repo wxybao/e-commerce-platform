@@ -141,22 +141,27 @@ async function initMap() {
     coordinates: defaultCenter
   });
 
-  if (!navigator.geolocation) {
-    // showToast('Геолокация не поддерживается в вашем браузере')
-    return
+  if (form.value.id) {
+    // 编辑的时候需要更具地址id来定位
+    addressChange()
+  } else {
+    if (!navigator.geolocation) {
+      // showToast('Геолокация не поддерживается в вашем браузере')
+      return
+    }
+
+    // 浏览器读取位置获取当前地址信息
+    navigator.geolocation.getCurrentPosition(async position => {
+      const {latitude, longitude} = position.coords;
+      const center = [longitude, latitude];
+
+      map.setCenter(center)
+
+      marker.setCoordinates(center)
+    }, error => {
+      // showToast('Не удалось определить ваше местонахождение')
+    })
   }
-
-  // 浏览器读取位置获取当前地址信息
-  navigator.geolocation.getCurrentPosition(async position => {
-    const {latitude, longitude} = position.coords;
-    const center = [longitude, latitude];
-
-    map.setCenter(center)
-
-    marker.setCoordinates(center)
-  }, error => {
-    // showToast('Не удалось определить ваше местонахождение')
-  })
 
 }
 
@@ -219,8 +224,8 @@ function addressChange() {
   // 把|换成，并且去除连续的，以及开头结尾的，
   address = address.replace(/\|/g, '，').replace(/，{2,}/g, '，').replace(/^，|，$/g, '')
 
-
   console.log(address)
+
   if (!address) {
     return
   }
