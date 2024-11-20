@@ -130,22 +130,21 @@ async function initMap() {
   let defaultCenter = [37.6173, 55.7558]
   map = new mapglAPI.Map('map', {
     center: defaultCenter,// 莫斯科
-    zoom: 13,
+    zoom: 16,
     key: apiKey,
     lang: "ru",
   });
 
   map.on("click", handleMapClick)
 
-  marker = new mapgl.Marker(map, {
-    coordinates: defaultCenter
-  });
-
   if (form.value.id) {
     // 编辑的时候需要更具地址id来定位
     addressChange()
   } else {
     if (!navigator.geolocation) {
+      handleMapClick({
+        lngLat: defaultCenter
+      })
       // showToast('Геолокация не поддерживается в вашем браузере')
       return
     }
@@ -157,8 +156,13 @@ async function initMap() {
 
       map.setCenter(center)
 
-      marker.setCoordinates(center)
+      handleMapClick({
+        lngLat: center
+      })
     }, error => {
+      handleMapClick({
+        lngLat: defaultCenter
+      })
       // showToast('Не удалось определить ваше местонахождение')
     })
   }
@@ -178,7 +182,25 @@ const handleMapClick = (event) => {
 
   // 获取地址信息
   fetchLocationDetailsOrCoordinates(coordinates).then(address => {
+    if (address.full_address_name) {
+      const add = address.full_address_name.split('/')[0]
 
+      const list = add.split(',')
+      form.value.city = list[0]
+      if (list.length > 1) {
+        form.value.street = list[1]
+      }
+      if (list.length > 2) {
+        form.value.buildingNo = list.slice(2).join(',')
+      }
+    } else if (address.full_name) {
+      const list = address.full_name.split(',')
+      form.value.city = list[0]
+      form.value.street = ''
+      if (list.length > 1) {
+        form.value.buildingNo = list.slice(1).join(',')
+      }
+    }
   });
 };
 
@@ -191,23 +213,21 @@ const fetchLocationDetailsOrCoordinates = async (param) => {
 
   // 如果param是字符串则是获取坐标
   if (typeof param === 'string') {
-    url = `https://catalog.api.2gis.com/3.0/items/geocode?q=${encodeURIComponent(param)}&key=${apiKey}`
+    url = `https://catalog.api.2gis.com/3.0/items/geocode?q=${encodeURIComponent(param)}&fields=items.point&key=${apiKey}`
   } else {
     const [lng, lat] = param;
-    url = `https://catalog.api.2gis.com/3.0/items/geocode?lon=${lng}&lat=${lat}&key=${apiKey}`;
+    url = `https://catalog.api.2gis.com/3.0/items/geocode?lon=${lng}&lat=${lat}&fields=items.full_address_name&key=${apiKey}`;
   }
 
   try {
     const response = await fetch(url);
     const data = await response.json();
     if (data && data.result && data.result.items.length > 0) {
-      console.log(data.result)
       if (typeof param === 'string') {
         const {lat, lon} = data.result.items[0].point;
         return {lat, lon};
       } else {
-        const address = data.result.items[0].full_name;
-        return address;
+        return data.result.items[0];
       }
     } else {
       return null
@@ -224,16 +244,19 @@ function addressChange() {
   // 把|换成，并且去除连续的，以及开头结尾的，
   address = address.replace(/\|/g, '，').replace(/，{2,}/g, '，').replace(/^，|，$/g, '')
 
-  console.log(address)
-
   if (!address) {
     return
   }
   fetchLocationDetailsOrCoordinates(address).then((coords) => {
     if (coords) {
-      const center = [coords.lon, coords.lat]
-      map.setCenter(center)
-      marker.setCoordinates(center)
+      const coordinates = [coords.lon, coords.lat]
+      map.setCenter(coordinates)
+
+      if (!marker) {
+        marker = new mapgl.Marker(map, {coordinates});
+      } else {
+        marker.setCoordinates(coordinates);
+      }
     }
   });
 }
@@ -248,7 +271,7 @@ function cancel() {
     fromInfo = JSON.parse(fromParam)
     sessionStorage.setItem('fromAddress', 1)
   }
-  console.log(fromInfo)
+
   router.replace({
     name: fromInfo.name,
     query: fromInfo.query

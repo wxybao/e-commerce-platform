@@ -5,12 +5,13 @@
 
     <div class="mt-8">
       <template v-if="hasInit && !addressList.length">
-        <van-empty description="Адрес не добавлен."/>
+        <van-empty :image-size="showBuy ? 110 : 160" :style="showBuy ? 'padding: 0' : ''"
+                   description="Адрес не добавлен."/>
       </template>
       <template v-else>
         <div class="address-list-item" v-for="address in addressList" :key="address.id">
           <div class="flex-left">
-            <div class="qi mr-10">{{address.name}} {{ address.phone }}</div>
+            <div class="qi mr-10">{{ address.name }} {{ address.phone }}</div>
             <div class="line-under mr-16" @click="gotoUrl(address)">Редактировать</div>
             <div class="line-under" @click="delAddressList(address.id)">Удалить</div>
           </div>
@@ -126,7 +127,7 @@ function gotoUrl(detail) {
 }
 
 function buyClick(address) {
-  emits('buyClick',address)
+  emits('buyClick', address)
 }
 </script>
 
