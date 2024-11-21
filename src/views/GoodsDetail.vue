@@ -246,16 +246,16 @@ function showAddress() {
 }
 
 onBeforeUnmount(()=>{
-  if(time){
-    clearTimeout(time)
+  if(timeout){
+    clearTimeout(timeout)
   }
 })
 
 let hasClick = false
-let time = null
+let timeout = null
 async function buyProduct(address) {
   if (hasClick) return
-  time = setTimeout(() => {
+  timeout = setTimeout(() => {
     hasClick = false
   },2000)
 
