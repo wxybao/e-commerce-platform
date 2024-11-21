@@ -147,7 +147,7 @@
 
 <script setup>
 import PageFooter from "@/components/PageFooter.vue";
-import {onMounted, ref} from "vue";
+import {onBeforeUnmount, onMounted, ref} from "vue";
 import AddressList from "@/views/AddressList.vue";
 import {useRoute} from "vue-router";
 import NavBar from "@/components/NavBar.vue";
@@ -245,11 +245,17 @@ function showAddress() {
   popupVisible.value = true
 }
 
-let hasClick = false
+onBeforeUnmount(()=>{
+  if(time){
+    clearTimeout(time)
+  }
+})
 
+let hasClick = false
+let time = null
 async function buyProduct(address) {
   if (hasClick) return
-  setTimeout(() => {
+  time = setTimeout(() => {
     hasClick = false
   },2000)
 
