@@ -62,7 +62,7 @@
       />
 
       <div class="flex-left">
-        <van-button type="primary" color="#F55266" native-type="submit">Выбрать</van-button>
+        <van-button type="primary" color="#F55266" native-type="submit" :loading="loading" loading-text="Выбрать">Выбрать</van-button>
         <van-button class="close-btn" type="primary" color="#EEF1F6" @click="cancel()">Закрыть</van-button>
       </div>
     </van-form>
@@ -86,9 +86,11 @@ const detail = sessionStorage.getItem('addressDetail') || ''
 const userStore = useUserStore()
 const {userInfo} = storeToRefs(userStore)
 
+const loading = ref(false)
+
 const form = ref({
   id: 0,
-  userId: userInfo.value?.id,
+  userId: userInfo.value?.id || 0,
   city: '',
   street: '',
   buildingCall: '',
@@ -279,6 +281,8 @@ function cancel() {
 }
 
 const onSubmit = (values) => {
+  loading.value = true
+
   if (form.value.id) {
     upd_address(form.value).then(res => {
       if (res.code === "0") {
@@ -289,6 +293,8 @@ const onSubmit = (values) => {
         message: err.msg || 'провал',
         wordBreak: 'break-word',
       })
+    }).finally(()=>{
+      loading.value = false
     })
   } else {
     insert_address(form.value).then(res => {
@@ -300,6 +306,8 @@ const onSubmit = (values) => {
         message: err.msg || 'провал',
         wordBreak: 'break-word',
       })
+    }).finally(()=>{
+      loading.value = false
     })
   }
 };

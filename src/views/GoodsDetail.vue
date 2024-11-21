@@ -245,7 +245,16 @@ function showAddress() {
   popupVisible.value = true
 }
 
+let hasClick = false
+
 async function buyProduct(address) {
+  if (hasClick) return
+  setTimeout(() => {
+    hasClick = false
+  },2000)
+
+  hasClick = true
+
   const currentIsConnectedStatus = tonConnectUI.connected;
 
   if (currentIsConnectedStatus) {
