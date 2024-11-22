@@ -26,7 +26,7 @@
 
       <div class="flex-between mt-20">
         <van-stepper v-model="productNum" :min="1" :max="99" button-size="44px" input-width="70px" integer
-                     class="mr-20 input-stepper"/>
+                     class="input-stepper"/>
         <van-button type="primary" color="#F55266" @click="showAddress()">КУПИТЬ СЕЙЧАС</van-button>
       </div>
 
