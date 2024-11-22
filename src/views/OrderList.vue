@@ -1,7 +1,14 @@
 <template>
   <div class="order-list">
     <NavBar/>
-    <div class="title">Заказы</div>
+    <div class="flex-between">
+      <div class="title">Заказы</div>
+
+      <van-button style="width: 120px" size="small" :loading="loading" plain icon="replay" type="primary" color="#F55266"
+                  @click="getOrderList()">подновление
+      </van-button>
+    </div>
+
 
     <div class="orders">
       <template v-if="hasInit && !orderList.length">
@@ -32,7 +39,7 @@
           </van-row>
           <van-row class="mt-16">
             <van-col span="12" class="item-label">количество</van-col>
-            <van-col span="12" class="item-content">{{item.qty}}</van-col>
+            <van-col span="12" class="item-content">{{ item.qty }}</van-col>
           </van-row>
         </div>
       </template>
@@ -54,12 +61,14 @@ const {userInfo} = storeToRefs(userStore)
 const orderList = ref([])
 const pageIndex = 0
 const hasInit = ref(false)
+const loading = ref(false)
 
 onMounted(() => {
   getOrderList()
 })
 
 function getOrderList() {
+  loading.value = true
   sale_order({
     limit: 100,
     offset: pageIndex,
@@ -75,6 +84,7 @@ function getOrderList() {
     })
   }).finally(() => {
     hasInit.value = true
+    loading.value = false
   })
 }
 </script>

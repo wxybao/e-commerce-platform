@@ -25,7 +25,7 @@ export const useUserStore = defineStore('user', {
   getters: {
     // userInfo: state => {
     //   return {
-    //     id: 1
+    //     id: 1774907451
     //   }
     // }
     userInfo: state => state.user?.user

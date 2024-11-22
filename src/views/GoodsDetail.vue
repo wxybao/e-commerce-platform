@@ -139,7 +139,7 @@
                :style="{ height: '50%' }" class="popup-box">
       <div class="top-line"></div>
 
-      <AddressList :fromParam="{name: 'GoodsDetail',query:{id: productId}}" show-buy
+      <AddressList :fromParam="{name: 'GoodsDetail',query:{id: productId}}" show-buy :buyLoading="buyLoading"
                    @buy-click="buyProduct"/>
     </van-popup>
   </div>
@@ -147,9 +147,9 @@
 
 <script setup>
 import PageFooter from "@/components/PageFooter.vue";
-import {onBeforeUnmount, onMounted, ref} from "vue";
+import {onMounted, ref} from "vue";
 import AddressList from "@/views/AddressList.vue";
-import {useRoute} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import NavBar from "@/components/NavBar.vue";
 import tonConnectUI from "@/ton/index.js";
 import {save_order, wallet_address} from "@/api/api.js";
@@ -158,6 +158,7 @@ import {useUserStore} from "@/stores/user.js";
 import {storeToRefs} from "pinia";
 
 const route = useRoute()
+const router = useRouter()
 const productId = Number(route.query.id || 0)
 
 const userStore = useUserStore()
@@ -233,6 +234,7 @@ const collapseList2 = [
 ]
 
 const popupVisible = ref(false)
+const buyLoading = ref(false)
 
 onMounted(() => {
   if (from) {
@@ -242,24 +244,12 @@ onMounted(() => {
 })
 
 function showAddress() {
+  buyLoading.value = false
   popupVisible.value = true
 }
 
-onBeforeUnmount(()=>{
-  if(timeout){
-    clearTimeout(timeout)
-  }
-})
-
-let hasClick = false
-let timeout = null
 async function buyProduct(address) {
-  if (hasClick) return
-  timeout = setTimeout(() => {
-    hasClick = false
-  },2000)
-
-  hasClick = true
+  buyLoading.value = true
 
   const currentIsConnectedStatus = tonConnectUI.connected;
 
@@ -283,6 +273,8 @@ async function buyProduct(address) {
       });
     } catch (e) {
       console.log(e)
+    } finally {
+      buyLoading.value = false
     }
   }
 }
@@ -311,13 +303,15 @@ async function setTransaction(address) {
   const currentAccount = tonConnectUI.account;
   const tonAddress = currentAccount?.address
 
-  const img = await convertImageUrlToBase64(new URL(`../assets/goods-${productId}.png`, import.meta.url).href)
+  // const img = await convertImageUrlToBase64(new URL(`../assets/goods-${productId}.png`, import.meta.url).href)
+  const img = `https://www.xjtd.store/shop-server/goods-${productId}.png`
+
 
   save_order({
     walletAddress: tonAddress,
     "color": colors[activeColor.value].name,
     "image": img,
-    "price": 1,
+    "price": 0.1,
     // "price": productId === 1 ? 599.00 : 875.00,
     "productName": productId === 1 ? 'Повышенной проходимости gokart' : 'Повышенной проходимости gokart (pro)',
     "qty": productNum.value,
@@ -338,15 +332,35 @@ async function setTransaction(address) {
 
       try {
         const result = await tonConnectUI.sendTransaction(transaction);
+
+        if (result.boc) {
+          showToast({
+            message: 'Оплата успешно произведена, ожидается подтверждение получения на блокчейне.',
+            wordBreak: 'normal',
+            duration: 5000
+          })
+
+          setTimeout(() => {
+            router.push({
+              name: 'OrderList'
+            })
+          },5000)
+        }
+        // const someTxData = await myAppExplorerService.getTransaction(result.boc);
+        // alert('Transaction was sent successfully', someTxData);
       } catch (e) {
         console.error(e);
       }
     }
   }).catch(err => {
-    showToast({
-      message: err.msg,
-      wordBreak: 'break-word',
-    })
+    if (err && err.msg) {
+      showToast({
+        message: err.msg,
+        wordBreak: 'break-word',
+      })
+    }
+  }).finally(() => {
+    buyLoading.value = false
   })
 }
 

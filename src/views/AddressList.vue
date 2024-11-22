@@ -24,7 +24,8 @@
             <li>Вызов в здание：{{ address.buildingCall }}</li>
           </ul>
 
-          <van-button v-if="showBuy" class="mt-i-8" type="primary" color="#F55266" @click="buyClick(address)">Выбрать
+          <van-button v-if="showBuy" :loading="buyLoading" loading-text="Выбрать" class="mt-i-8" type="primary" color="#F55266"
+                      @click="buyClick(address)">Выбрать
           </van-button>
         </div>
       </template>
@@ -34,7 +35,7 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {del_address, user_address} from "@/api/api.js";
 import {showConfirmDialog, showSuccessToast, showToast} from "vant";
 import {useRouter} from "vue-router";
@@ -52,6 +53,10 @@ const props = defineProps({
     default: () => {
       return {}
     }
+  },
+  buyLoading: {
+    type: Boolean,
+    default: false
   }
 })
 
