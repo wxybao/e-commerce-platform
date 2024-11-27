@@ -15,18 +15,20 @@
         мире картинга.
       </div>
 
-      <div class="flex">
-        <div class="flex-1 mr-8 goods-card" @click="gotoDetail(1)">
+      <div class="flex mt-20">
+        <div class="flex-1 mr-16 goods-card" @click="gotoDetail(1)">
           <div class="img-box"><img src="@/assets/goods-1.png"/></div>
           <div class="goods-title">Повышенной<br/>проходимости<br/>gokart</div>
           <div class="goods-price">$599.00 USDT</div>
           <div class="goods-price-line">$649.0 USDT</div>
+          <van-button class="buy-btn" type="primary" color="#F55266">Купить</van-button>
         </div>
         <div class="flex-1 goods-card" @click="gotoDetail(2)">
           <div class="img-box"><img src="@/assets/goods-2.png"/></div>
           <div class="goods-title">Повышенной<br/>проходимости<br/>gokart (pro)</div>
           <div class="goods-price">$875.00 USDT</div>
           <div class="goods-price-line">$920.00 USDT</div>
+          <van-button class="buy-btn" type="primary" color="#F55266">Купить</van-button>
         </div>
       </div>
 
@@ -274,12 +276,17 @@ function gotoDetail(id) {
 
     .goods-card {
       padding: 0 8px;
+      padding-bottom: 16px;
+      border-radius: 8px;
+      box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.10);
 
       .img-box {
-        padding: 16px;
+        padding: 16px 8px;
 
         img {
-          width: 100%;
+          height: 119px;
+          max-width: 100%;
+          margin: 0 auto;
         }
       }
 
@@ -298,6 +305,13 @@ function gotoDetail(id) {
         color: #9CA3AF;
         text-decoration: line-through;
         line-height: 22px;
+        font-size: 14px;
+      }
+
+      .buy-btn{
+        width: 98px;
+        margin-top: 5px;
+        height: 40px;
       }
     }
 
