@@ -15,9 +15,19 @@ const router = createRouter({
       component: () => import('../views/GoodsDetail.vue'),
     },
     {
+      path: '/cart',
+      name: 'Cart',
+      component: () => import('../views/Cart.vue'),
+    },
+    {
       path: '/personalCenter',
       name: 'PersonalCenter',
       component: () => import('../views/PersonalCenter.vue'),
+    },
+    {
+      path: '/orderConfirm',
+      name: 'OrderConfirm',
+      component: () => import('../views/OrderConfirm.vue'),
     },
     {
       path: '/orderList',

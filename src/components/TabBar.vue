@@ -1,26 +1,10 @@
 <template>
   <van-config-provider :theme-vars="themeVars">
     <van-tabbar v-model="active" placeholder :border="false" @change="onChange">
-      <van-tabbar-item name="home">
-        <span>Дом</span>
+      <van-tabbar-item v-for="item in tabs" :key="item.text" :name="item.name">
+        <span>{{ item.text }}</span>
         <template #icon="props">
-          <template v-if="props.active">
-            <img src="../assets/tabbar-home-active.png"/>
-          </template>
-          <template v-else>
-            <img src="../assets/tabbar-home.png"/>
-          </template>
-        </template>
-      </van-tabbar-item>
-      <van-tabbar-item name="person">
-        <span>Аккаунт</span>
-        <template #icon="props">
-          <template v-if="props.active">
-            <img src="../assets/tabbar-user-active.png"/>
-          </template>
-          <template v-else>
-            <img src="../assets/tabbar-user.png"/>
-          </template>
+          <component class="text-30" :is="props.active ? item.activeIcon : item.icon"/>
         </template>
       </van-tabbar-item>
     </van-tabbar>
@@ -30,25 +14,43 @@
 <script setup>
 import {reactive} from "vue";
 import {useRouter} from "vue-router";
+import IconParkSolidHomeTwo from "@/assets/svg/tabbar/IconParkSolidHomeTwo.vue";
+import IconParkOutlineHomeTwo from "@/assets/svg/tabbar/IconParkOutlineHomeTwo.vue";
+import IconParkOutlineClassroom from "@/assets/svg/tabbar/IconParkOutlineClassroom.vue";
+import IconParkSolidClassroom from "@/assets/svg/tabbar/IconParkSolidClassroom.vue";
+import IconParkSolidShopping from "@/assets/svg/tabbar/IconParkSolidShopping.vue";
+import IconParkOutlineShopping from "@/assets/svg/tabbar/IconParkOutlineShopping.vue";
 
 const active = defineModel()
 
+const tabs = [{
+  text: 'Главная',
+  name: 'Home',
+  icon: IconParkOutlineHomeTwo,
+  activeIcon: IconParkSolidHomeTwo
+}, {
+  text: 'покупок',
+  name: 'Cart',
+  icon: IconParkOutlineShopping,
+  activeIcon: IconParkSolidShopping
+}, {
+  text: 'Аккаунт',
+  name: 'PersonalCenter',
+  icon: IconParkOutlineClassroom,
+  activeIcon: IconParkSolidClassroom
+}]
+
 const themeVars = reactive({
   tabbarHeight: '70px',
-  tabbarBackground: '#121212',
+  tabbarBackground: '#4c4c4c',
   tabbarItemTextColor: '#A9A9A9',
-  tabbarItemActiveColor: '#F26F3F',
-  'tabbar-item-active-background': '#121212'
+  'tabbar-item-active-background': '#4c4c4c'
 })
 
 const router = useRouter()
 
 function onChange(index) {
-  if (index === 'home') {
-    router.replace({name: 'Home'})
-  } else {
-    router.replace({name: 'PersonalCenter'})
-  }
+  router.replace({name: index})
 }
 </script>
 
@@ -57,7 +59,7 @@ function onChange(index) {
   font-size: 15px;
   font-weight: bold;
 
-  .van-tabbar-item__icon img {
+  .van-tabbar-item__icon svg {
     height: 30px;
   }
 }

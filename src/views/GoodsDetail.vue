@@ -279,26 +279,6 @@ async function buyProduct(address) {
   }
 }
 
-function convertImageUrlToBase64(url) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.setAttribute('crossOrigin', 'anonymous'); // 处理跨域问题
-    img.onload = function () {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      const dataURL = canvas.toDataURL('image/png');
-      resolve(dataURL);
-    };
-    img.onerror = function (error) {
-      reject(error);
-    };
-    img.src = url;
-  });
-}
-
 async function setTransaction(address) {
   const currentAccount = tonConnectUI.account;
   const tonAddress = currentAccount?.address

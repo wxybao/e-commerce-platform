@@ -40,7 +40,7 @@ const userStore = useUserStore()
 const {userInfo} = storeToRefs(userStore)
 
 const router = useRouter();
-const activeTab = ref('person');
+const activeTab = ref('PersonalCenter');
 
 const menuList = [{
   title: 'Мой адрес',

@@ -28,7 +28,13 @@ import {
   Toast,
   Empty,
   Dialog,
-  NavBar
+  NavBar,
+  Checkbox,
+  CheckboxGroup,
+  Space,
+  Icon,
+  RadioGroup,
+  Radio,
 } from 'vant'
 import 'vant/lib/index.css'
 import RU from 'vant/es/locale/lang/ru-RU';
@@ -63,5 +69,11 @@ app.use(Toast)
 app.use(Empty)
 app.use(Dialog)
 app.use(NavBar)
+app.use(Checkbox)
+app.use(CheckboxGroup)
+app.use(Space)
+app.use(Icon)
+app.use(RadioGroup)
+app.use(Radio)
 
 app.mount('#app')

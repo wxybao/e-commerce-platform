@@ -3,9 +3,11 @@
 </template>
 
 <script setup>
-window.Telegram.WebApp.disableVerticalSwipes();
-window.Telegram.WebApp.enableClosingConfirmation();
-window.Telegram.WebApp.expand()
+if (window.Telegram) {
+  window.Telegram.WebApp.disableVerticalSwipes();
+  window.Telegram.WebApp.enableClosingConfirmation();
+  window.Telegram.WebApp.expand()
+}
 </script>
 
 <style scoped>

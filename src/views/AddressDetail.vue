@@ -264,19 +264,8 @@ function addressChange() {
 }
 
 function cancel() {
-  const fromParam = sessionStorage.getItem('fromParam')
-  let fromInfo = {
-    name: 'AddressList',
-    query: {}
-  }
-  if (fromParam) {
-    fromInfo = JSON.parse(fromParam)
-    sessionStorage.setItem('fromAddress', 1)
-  }
-
   router.replace({
-    name: fromInfo.name,
-    query: fromInfo.query
+    name: 'AddressList'
   })
 }
 
