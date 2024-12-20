@@ -107,7 +107,7 @@ async function gotoPay(item) {
   const currentIsConnectedStatus = tonConnectUI.connected;
 
   if (currentIsConnectedStatus) {
-    setTransaction()
+    setTransaction(item)
   } else {
     try {
       const res = await tonConnectUI.openModal()
@@ -119,7 +119,7 @@ async function gotoPay(item) {
             id: userInfo.value?.id
           })
 
-          setTransaction()
+          setTransaction(item)
 
           unsubscribe()
         }
@@ -131,7 +131,7 @@ async function gotoPay(item) {
   }
 }
 
-async function setTransaction() {
+async function setTransaction(item) {
   const res = await pay({
     userId: userInfo.value?.id,
     walletAddress: item.jettonWalletAddress,
