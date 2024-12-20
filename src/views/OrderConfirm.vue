@@ -52,7 +52,7 @@
     </div>
 
     <div class="bottom-money flex-between">
-      <span>итого：${{totalPrice}} USDT</span>
+      <span>итого：${{ totalPrice }} USDT</span>
       <van-button class="ok-btn" type="primary" @click="orderConfirm()">расчет</van-button>
     </div>
   </div>
@@ -67,6 +67,11 @@ import {showToast} from "vant";
 import AddressItem from "@/components/AddressItem.vue";
 import tonConnectUI from "@/ton/index.js";
 import NavBar from "@/components/NavBar.vue";
+import {useUserStore} from "@/stores/user.js";
+import {storeToRefs} from "pinia";
+
+const userStore = useUserStore()
+const {userInfo} = storeToRefs(userStore)
 
 const router = useRouter()
 const route = useRoute()
@@ -74,7 +79,7 @@ const checkedProductObj = localStorage.getItem('ec-checkedProduct')
 
 const products = ref([])
 const address = ref({})
-const addressId = route.query.addressId || 0
+const addressId = Number(route.query.addressId || 0)
 
 const payType = ref('TonWallet')
 
@@ -106,28 +111,16 @@ onMounted(() => {
 })
 
 function getAddressList() {
-  // 模拟5条数据
-  address.value = {
-    id: 1,
-    name: 'Имя ',
-    phone: '123333333 ',
-    city: 'Город ',
-    street: 'Улица ',
-    buildingNo: 'Номер здания ',
-    unit: 'Единица ',
-  }
-
-  return
   user_address({
     limit: 100,
-    offset: pageIndex,
+    offset: 0,
     userId: userInfo.value?.id || 0
   }).then(res => {
     if (res.code === "0") {
       const addressList = res.data || []
       if (addressList.length) {
         if (addressId) {
-          address.value = addressList.find(item => item.id == addressId)
+          address.value = addressList.find(item => item.id === addressId)
         } else {
           address.value = addressList[0]
         }
@@ -159,7 +152,7 @@ async function orderConfirm() {
   const currentIsConnectedStatus = tonConnectUI.connected;
 
   if (currentIsConnectedStatus) {
-    await setTransaction(address)
+    await setTransaction()
   } else {
     try {
       const res = await tonConnectUI.openModal()
@@ -171,7 +164,7 @@ async function orderConfirm() {
             id: userInfo.value?.id
           })
 
-          setTransaction(address)
+          setTransaction()
 
           unsubscribe()
         }
@@ -183,23 +176,24 @@ async function orderConfirm() {
   }
 }
 
-async function setTransaction(address) {
+async function setTransaction() {
   loading.value = true
 
   const currentAccount = tonConnectUI.account;
   const tonAddress = currentAccount?.address
 
-  const img = `https://www.xjtd.store/shop-server/goods-${productId}.png`
-
+  const saleOrderDetailList = products.value.map(item => {
+    return {
+      price: item.salePrice,
+      productId: item.productId,
+      qty: item.qty
+    }
+  })
   save_order({
+    saleOrderDetailList: saleOrderDetailList,
     walletAddress: tonAddress,
-    "image": img,
-    "price": 0.1,
-    // "price": productId === 1 ? 599.00 : 875.00,
-    "productName": productId === 1 ? 'Повышенной проходимости gokart' : 'Повышенной проходимости gokart (pro)',
-    "qty": productNum.value,
-    "userAddressId": address.id,
-    "userId": userInfo.value?.id
+    userAddressId: address.value.id,
+    userId: userInfo.value?.id
   }).then(async res => {
     if (res.code === '0') {
       const transaction = {
@@ -227,7 +221,7 @@ async function setTransaction(address) {
             router.push({
               name: 'OrderList'
             })
-          },5000)
+          }, 5000)
         }
         // const someTxData = await myAppExplorerService.getTransaction(result.boc);
         // alert('Transaction was sent successfully', someTxData);

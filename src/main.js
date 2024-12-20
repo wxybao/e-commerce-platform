@@ -35,6 +35,7 @@ import {
   Icon,
   RadioGroup,
   Radio,
+  SwipeCell
 } from 'vant'
 import 'vant/lib/index.css'
 import RU from 'vant/es/locale/lang/ru-RU';
@@ -75,5 +76,6 @@ app.use(Space)
 app.use(Icon)
 app.use(RadioGroup)
 app.use(Radio)
+app.use(SwipeCell)
 
 app.mount('#app')

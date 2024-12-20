@@ -1,35 +1,36 @@
 <template>
   <div class="page-footer">
-    <div class="text-23 title">КОНТАКТНАЯ ИНФОРМАЦИЯ</div>
-    <div class="mt-12 color1">Мы будем рады услышать от вас о нашем обслуживании клиентов, товарах, веб-сайте или любых
-      темах,
-      которые вы хотите с нами обсудить. Ваши комментарии и предложения будут оценены.
-    </div>
-
-    <div class="mt-35 color2">
-      Rm 509 5/F, The Cloud, 111 Tung Chau Street, Tai Kok Tsui, KL
-    </div>
-    <div class="mt-10 color2">
-      +86 18761866427
-    </div>
-    <div class="mt-10 color2">
-      tt02redrocket@njredrock.com
-    </div>
-    <div class="mt-10 color2">
-      Каждый день с 9:00 до 17:00
-    </div>
+    <div class="text-23 title">{{ info.bottomTitle }}</div>
+    <div class="mt-12 color2" style="line-height: 1.8" v-html="info.bottomText"></div>
 
     <div class="line"></div>
 
     <div class="text-12">
       <span class="color1">Copyright © 2024</span>
-      <span class="color2"> www.rocketkarting.com</span>
+      <span class="color2"> TG E-Commerce</span>
     </div>
   </div>
 </template>
 
 <script setup>
+import {shop_info} from "@/api/api.js";
+import {onMounted, ref} from "vue";
 
+const info = ref({})
+onMounted(() => {
+  getInit()
+})
+
+async function getInit() {
+  const res = await shop_info()
+
+  if (res.code === '0') {
+    info.value = res.data || {}
+    if(info.value.bottomText){
+      info.value.bottomText = info.value.bottomText.replace(/\n/g, '<br/>')
+    }
+  }
+}
 </script>
 
 <style scoped lang="scss">
@@ -39,7 +40,7 @@
   padding: 48px 16px 24px 16px;
   text-align: center;
 
-  .title{
+  .title {
     font-weight: bold;
   }
 

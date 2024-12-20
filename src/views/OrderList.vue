@@ -29,21 +29,23 @@
             Дата заказа：{{ item.createdAt }}
           </div>
           <div class="product-list">
-            <div class="product-item" v-for="(product, index) in item.saleOrderDetailList" :key="index">
-              <img src="../assets/goods-1.png"/>
-              <van-row class="mt-10">
-                <van-col span="12" class="item-label">Заказ #</van-col>
-                <van-col span="12" class="item-content">{{ product.productName }}</van-col>
-              </van-row>
-              <van-row class="mt-10">
-                <van-col span="12" class="item-label">Итог</van-col>
-                <van-col span="12" class="item-content">${{ product.money }} USDT</van-col>
-              </van-row>
-              <van-row class="mt-10">
-                <van-col span="12" class="item-label">количество</van-col>
-                <van-col span="12" class="item-content">{{ product.qty }}</van-col>
-              </van-row>
-            </div>
+            <template v-if="item.saleOrderDetailList && item.saleOrderDetailList.length">
+              <div class="product-item" v-for="(product, index) in item.saleOrderDetailList" :key="index">
+                <img src="../assets/goods-1.png"/>
+                <van-row class="mt-10">
+                  <van-col span="12" class="item-label">Заказ #</van-col>
+                  <van-col span="12" class="item-content">{{ product.productName }}</van-col>
+                </van-row>
+                <van-row class="mt-10">
+                  <van-col span="12" class="item-label">Итог</van-col>
+                  <van-col span="12" class="item-content">${{ product.money }} USDT</van-col>
+                </van-row>
+                <van-row class="mt-10">
+                  <van-col span="12" class="item-label">количество</van-col>
+                  <van-col span="12" class="item-content">{{ product.qty }}</van-col>
+                </van-row>
+              </div>
+            </template>
           </div>
 
           <template v-if="item.state === 'UN_PAY'">
@@ -80,97 +82,6 @@ onMounted(() => {
 })
 
 function getOrderList() {
-  // 模拟5条数据
-  orderList.value = [{
-    orderNo: '12312312312',
-    "buildingCall": 1,
-    "buildingNo": 1,
-    "city": "城市",
-    "createdAt": "2024-01-01 00:00:00",
-    "floor": 1,
-    "freight": 1,
-    "id": 1,
-    "idBase64": 1,
-    "jettonWalletAddress": 1,
-    "merchantId": 0,
-    "money": 1,
-    "name": 1,
-    "phone": 1,
-    "saleOrderDetailList": [
-      {
-        "createdAt": 1,
-        "merchantId": 0,
-        "money": 1,
-        "orderDetailNum": 1,
-        "orderId": 1,
-        "orderNo": 1,
-        "price": 1,
-        "productId": 1,
-        "productMasterImageUrl": 1,
-        "productName": 1,
-        "qty": 1,
-        "updatedAt": 1
-      }, {
-        "createdAt": 1,
-        "merchantId": 0,
-        "money": 1,
-        "orderDetailNum": 1,
-        "orderId": 1,
-        "orderNo": 1,
-        "price": 1,
-        "productId": 1,
-        "productMasterImageUrl": 1,
-        "productName": 1,
-        "qty": 1,
-        "updatedAt": 1
-      }
-    ],
-    "state": 'UN_PAY',
-    "street": "街道",
-    "unit": 1,
-    "updatedAt": "2024-01-01 00:00:00",
-    "userAddressId": 1,
-    "userId": 1
-  }, {
-    orderNo: '12312312312',
-    "buildingCall": 1,
-    "buildingNo": 1,
-    "city": "城市",
-    "createdAt": "2024-01-01 00:00:00",
-    "floor": 1,
-    "freight": 1,
-    "id": 1,
-    "idBase64": 1,
-    "jettonWalletAddress": 1,
-    "merchantId": 0,
-    "money": 1,
-    "name": 1,
-    "phone": 1,
-    "saleOrderDetailList": [
-      {
-        "createdAt": 1,
-        "merchantId": 0,
-        "money": 1,
-        "orderDetailNum": 1,
-        "orderId": 1,
-        "orderNo": 1,
-        "price": 1,
-        "productId": 1,
-        "productMasterImageUrl": 1,
-        "productName": 1,
-        "qty": 1,
-        "updatedAt": 1
-      }
-    ],
-    "state": "COMPLETED",
-    "street": "街道",
-    "unit": 1,
-    "updatedAt": "2024-01-01 00:00:00",
-    "userAddressId": 1,
-    "userId": 1
-  }]
-
-  return
   loading.value = true
   sale_order({
     limit: 100,
@@ -216,16 +127,17 @@ function getOrderList() {
         transform: rotate(-15deg);
         transform-origin: 140% 100% 0;
 
-        &:before{
+        &:before {
           content: '';
-          border-top:4px solid #F55266;
+          border-top: 4px solid #F55266;
           position: absolute;
           left: 0;
           right: 0;
         }
-        &:after{
+
+        &:after {
           content: '';
-          border-top:4px solid #F55266;
+          border-top: 4px solid #F55266;
           position: absolute;
           left: 0;
           right: 0;

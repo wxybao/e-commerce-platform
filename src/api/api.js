@@ -32,3 +32,23 @@ export const upd_address = (params) => {
 export const del_address = (params) => {
   return request({ url: shopUrl + 'user_address/' + params, method: 'delete' })
 }
+
+export const shop_info = (params) => {
+  return request({ url: shopUrl + 'profile_resource/shop_info', method: 'get',params: params })
+}
+export const product_list = (params) => {
+  return request({ url: shopUrl + 'product/', method: 'get',params: params })
+}
+export const product_detail = (params) => {
+  return request({ url: shopUrl + 'product/' + params, method: 'get' })
+}
+
+export const add_cart = (params) => {
+  return request({ url: shopUrl + 'shopping_cart/', method: 'post', data: params })
+}
+export const get_cart = (params) => {
+  return request({ url: shopUrl + 'shopping_cart/' + params, method: 'get' })
+}
+export const del_cart_product = (params) => {
+  return request({ url: shopUrl + 'shopping_cart/', method: 'delete', data: params })
+}

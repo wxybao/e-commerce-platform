@@ -20,16 +20,28 @@ import {defineStore} from 'pinia'
 export const useUserStore = defineStore('user', {
   state: () => ({
     user: window.Telegram?.WebApp.initDataUnsafe,
-    hasLogin: false
+    shopId: ''
   }),
   getters: {
-    userInfo: state => {
-      return {
-        id: 1774907451
-      }
-    }
-    // userInfo: state => state.user?.user
+    // userInfo: state => {
+    //   return {
+    //     id: 1
+    //   }
+    // }
+    userInfo: state => state.user?.user
   },
   actions: {
+    setShopId(shopId) {
+      this.shopId = shopId
+    }
+  },
+  persist: {
+    enabled: true,
+    strategies: [
+      {
+        storage: localStorage,
+        paths: ['shopId']
+      }
+    ]
   }
 })

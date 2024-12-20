@@ -41,18 +41,6 @@ onMounted(() => {
 })
 
 function getAddressList() {
-  // 模拟5条数据
-  addressList.value = Array.from({length: 5}, (_, i) => ({
-    id: i + 1,
-    name: 'Имя ' + (i + 1),
-    phone: '123333333 ' + (i + 1),
-    city: 'Город ' + (i + 1),
-    street: 'Улица ' + (i + 1),
-    buildingNo: 'Номер здания ' + (i + 1),
-    unit: 'Единица ' + (i + 1),
-  }))
-
-  return
   user_address({
     limit: 100,
     offset: pageIndex,
