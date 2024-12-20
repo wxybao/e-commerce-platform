@@ -14,6 +14,9 @@ export const pay_complete = (params) => {
 export const wallet_address = (params) => {
   return request({ url: shopUrl + 'user_account/wallet_address', method: 'put', data: params })
 }
+export const pay = (params) => {
+  return request({ url: shopUrl + 'sale_order/pay', method: 'post', data: params })
+}
 
 
 export const user_account = (params) => {

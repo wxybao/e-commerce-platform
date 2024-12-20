@@ -51,7 +51,7 @@
           <template v-if="item.state === 'UN_PAY'">
             <div class="pay-box flex-between">
               <span>итого：${{ item.money }} USDT</span>
-              <van-button class="ok-btn" type="primary">расчет</van-button>
+              <van-button class="ok-btn" type="primary" @click="gotoPay(item)">расчет</van-button>
             </div>
           </template>
 
@@ -63,11 +63,12 @@
 
 <script setup>
 import {onMounted, ref} from "vue";
-import {sale_order} from "@/api/api.js";
+import {pay, sale_order, wallet_address} from "@/api/api.js";
 import {showToast} from "vant";
 import NavBar from "@/components/NavBar.vue";
 import {useUserStore} from "@/stores/user.js";
 import {storeToRefs} from "pinia";
+import tonConnectUI from "@/ton/index.js";
 
 const userStore = useUserStore()
 const {userInfo} = storeToRefs(userStore)
@@ -100,6 +101,51 @@ function getOrderList() {
     hasInit.value = true
     loading.value = false
   })
+}
+
+async function gotoPay(item) {
+  const currentIsConnectedStatus = tonConnectUI.connected;
+
+  if (currentIsConnectedStatus) {
+    setTransaction()
+  } else {
+    try {
+      const res = await tonConnectUI.openModal()
+
+      const unsubscribe = tonConnectUI.onStatusChange((wallet) => {
+        if (wallet && tonConnectUI.connected) {
+          wallet_address({
+            walletAddress: wallet.account.address,
+            id: userInfo.value?.id
+          })
+
+          setTransaction()
+
+          unsubscribe()
+        }
+      });
+    } catch (e) {
+      console.log(e)
+    } finally {
+    }
+  }
+}
+
+async function setTransaction() {
+  const res = await pay({
+    userId: userInfo.value?.id,
+    walletAddress: item.jettonWalletAddress,
+    id: item.id
+  })
+
+  if (res.code === '0') {
+    showToast({
+      message: 'Оплата прошла успешно',
+      wordBreak: 'break-word',
+    })
+
+    getOrderList()
+  }
 }
 </script>
 
