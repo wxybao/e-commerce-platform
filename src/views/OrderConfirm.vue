@@ -61,9 +61,9 @@
 <script setup>
 
 import {useRoute, useRouter} from "vue-router";
-import {computed, onMounted, ref} from "vue";
-import {save_order, user_address, wallet_address} from "@/api/api.js";
-import {showToast} from "vant";
+import {onMounted, ref} from "vue";
+import {get_order, pay, save_order, user_address, wallet_address} from "@/api/api.js";
+import {showSuccessToast, showToast} from "vant";
 import AddressItem from "@/components/AddressItem.vue";
 import tonConnectUI from "@/ton/index.js";
 import NavBar from "@/components/NavBar.vue";
@@ -75,8 +75,10 @@ const {userInfo} = storeToRefs(userStore)
 
 const router = useRouter()
 const route = useRoute()
-const checkedProductObj = localStorage.getItem('ec-checkedProduct')
 
+const orderId = Number(route.query.orderId || 0)
+
+let addressDetail = {}
 const products = ref([])
 const address = ref({})
 const addressId = Number(route.query.addressId || 0)
@@ -89,28 +91,36 @@ const totalPrice = ref(0)
 const loading = ref(false)
 
 onMounted(() => {
-  if (!checkedProductObj) {
+  if (!orderId) {
     router.replace({
       name: 'Cart'
     })
     return
   }
 
-  const checkedProduct = JSON.parse(checkedProductObj)
-  if (!checkedProduct.length) {
-    router.replace({
-      name: 'Cart'
-    })
-    return
-  }
-
-  products.value = checkedProduct
-  totalPrice.value = products.value.reduce((acc, item) => acc + item.salePrice * item.qty, 0)
-
-  getAddressList()
+  getDetail()
 })
 
-function getAddressList() {
+// 获取订单详情
+async function getDetail() {
+  const res = await get_order(orderId)
+
+  if (res.code === '0') {
+    addressDetail = res.data || {}
+
+    products.value = addressDetail.saleOrderDetailList || []
+
+    totalPrice.value = addressDetail.money
+
+    getAddressList(addressId || res.data?.userAddressId || 0)
+  } else {
+    router.replace({
+      name: 'Cart'
+    })
+  }
+}
+
+function getAddressList(addressId) {
   user_address({
     limit: 100,
     offset: 0,
@@ -179,66 +189,26 @@ async function orderConfirm() {
 async function setTransaction() {
   loading.value = true
 
-  const currentAccount = tonConnectUI.account;
-  const tonAddress = currentAccount?.address
-
-  const saleOrderDetailList = products.value.map(item => {
-    return {
-      price: item.salePrice,
-      productId: item.productId,
-      qty: item.qty
-    }
+  const res = await pay({
+    userId: userInfo.value?.id,
+    walletAddress: addressDetail.jettonWalletAddress,
+    id: orderId
   })
-  save_order({
-    saleOrderDetailList: saleOrderDetailList,
-    walletAddress: tonAddress,
-    userAddressId: address.value.id,
-    userId: userInfo.value?.id
-  }).then(async res => {
-    if (res.code === '0') {
-      const transaction = {
-        validUntil: Math.floor(Date.now() / 1000) + 60,
-        messages: [
-          {
-            address: res.data.jettonWalletAddress,
-            amount: "50000000",
-            payload: res.data.idBase64
-          }
-        ]
-      }
 
-      try {
-        const result = await tonConnectUI.sendTransaction(transaction);
+  loading.value = false
 
-        if (result.boc) {
-          showToast({
-            message: 'Оплата успешно произведена, ожидается подтверждение получения на блокчейне.',
-            wordBreak: 'normal',
-            duration: 5000
-          })
+  if (res.code === '0') {
+    showSuccessToast({
+      message: 'Оплата прошла успешно',
+      wordBreak: 'break-word',
+    })
 
-          setTimeout(() => {
-            router.push({
-              name: 'OrderList'
-            })
-          }, 5000)
-        }
-        // const someTxData = await myAppExplorerService.getTransaction(result.boc);
-        // alert('Transaction was sent successfully', someTxData);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  }).catch(err => {
-    if (err && err.msg) {
-      showToast({
-        message: err.msg,
-        wordBreak: 'break-word',
+    setTimeout(()=>{
+      router.replace({
+        name: 'OrderList',
       })
-    }
-  }).finally(() => {
-    loading.value = false
-  })
+    },3000)
+  }
 }
 </script>
 

@@ -64,7 +64,7 @@
 <script setup>
 import {onMounted, ref} from "vue";
 import {pay, sale_order, wallet_address} from "@/api/api.js";
-import {showToast} from "vant";
+import {showSuccessToast, showToast} from "vant";
 import NavBar from "@/components/NavBar.vue";
 import {useUserStore} from "@/stores/user.js";
 import {storeToRefs} from "pinia";
@@ -139,7 +139,7 @@ async function setTransaction(item) {
   })
 
   if (res.code === '0') {
-    showToast({
+    showSuccessToast({
       message: 'Оплата прошла успешно',
       wordBreak: 'break-word',
     })

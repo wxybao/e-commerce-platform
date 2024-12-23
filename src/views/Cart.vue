@@ -7,7 +7,7 @@
         <van-swipe-cell v-for="(item, index) in productList" :key="index">
           <div class="product-item flex-left" :class="{disabled: item.productState !== 'ONLINE'}">
             <van-checkbox v-model="item.selectIs" :key="item.productId" :disabled="item.productState !== 'ONLINE'"
-                          @change="checkedResultChange">
+                          @change="checkedResultChange(item)">
             </van-checkbox>
             <div class="product-img">
               <img :src="item.masterImageUrl"/>
@@ -17,9 +17,9 @@
             </div>
             <div class="product-info flex-1">
               <div class="name overflowText-2">{{ item.productName }}</div>
-              <van-stepper :disabled="item.productState !== 'ONLINE'" v-model="item.qty" :min="1" :max="99"
-                           button-size="24px"
-                           input-width="50px" integer/>
+              <van-stepper v-model="item.qty" :min="1" :max="99"
+                           button-size="24px" :disabled="item.productState !== 'ONLINE'"
+                           input-width="50px" integer @change="productNumChange(item)"/>
               <div class="name price">${{ item.salePrice }} USDT</div>
             </div>
           </div>
@@ -52,11 +52,12 @@
 <script setup>
 import TabBar from "@/components/TabBar.vue";
 import {computed, onMounted, ref} from "vue";
-import {showSuccessToast, showToast} from "vant";
+import {showConfirmDialog, showSuccessToast, showToast} from "vant";
 import {useRouter} from "vue-router";
-import {del_cart_product, get_cart} from "@/api/api.js";
+import {add_cart, del_cart_product, get_cart, save_order, user_address} from "@/api/api.js";
 import {useUserStore} from "@/stores/user.js";
 import {storeToRefs} from "pinia";
+import {deepClone} from "@/utils/common.js";
 
 const router = useRouter()
 const activeTab = ref('Cart')
@@ -94,34 +95,20 @@ const checkAllChange = (val) => {
     productList.value.forEach(item => item.selectIs = false)
   }
   isIndeterminate.value = false
+
+  const products = deepClone(productList.value)
+  productNumChange(products)
 }
 
 // 选中状态
-const checkedResultChange = () => {
+const checkedResultChange = (product) => {
   const allCount = productList.value.filter(item => item.productState === 'ONLINE').length
   const checkedCount = productList.value.filter(item => item.selectIs && item.productState === 'ONLINE').length
 
   isCheckAll.value = checkedCount === allCount
   isIndeterminate.value = checkedCount > 0 && checkedCount < allCount
-}
 
-// 订单确认
-const orderConfirm = () => {
-  const checkedProduct = productList.value.filter(item => item.selectIs && item.productState === 'ONLINE')
-
-  if (!checkedProduct.length) {
-    showToast({
-      message: 'Пожалуйста, выберите хотя бы один товар.',
-      wordBreak: 'break-word',
-    })
-    return
-  }
-
-  // 缓存已经选择的商品信息
-  localStorage.setItem('ec-checkedProduct', JSON.stringify(checkedProduct))
-  router.push({
-    name: 'OrderConfirm'
-  })
+  productNumChange(product)
 }
 
 async function delProduct(item) {
@@ -137,6 +124,88 @@ async function delProduct(item) {
       productList.value.splice(index, 1)
     }
   }
+}
+
+// 数量修改
+function productNumChange(item) {
+  const detail = deepClone(item)
+  changeCart([detail])
+}
+
+function debounce(func, wait) {
+  let timeout;
+  return function (...args) {
+    const context = this;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(context, args), wait);
+  };
+}
+
+// 购物车商品数量修改
+const changeCart = debounce((shoppingCartDetailList) => {
+  shoppingCartDetailList.forEach(item => item.coverIs = true)
+  return add_cart({
+    shoppingCartDetailList: shoppingCartDetailList,
+    userId: userInfo.value?.id
+  })
+}, 1000)
+
+// 订单确认
+const orderConfirm = async () => {
+  const checkedProduct = productList.value.filter(item => item.selectIs && item.productState === 'ONLINE')
+
+  if (!checkedProduct.length) {
+    showToast({
+      message: 'Пожалуйста, выберите хотя бы один товар.',
+      wordBreak: 'break-word',
+    })
+    return
+  }
+
+  // 查询地址信息
+  const addressRes = await user_address({
+    limit: 100,
+    offset: 0,
+    userId: userInfo.value?.id || 0
+  })
+  if (addressRes.code !== '0' || !addressRes.data || !addressRes.data.length) {
+    showConfirmDialog({
+      title: 'Адрес',
+      message:
+        'Сначала создайте адрес.',
+    }).then(() => {
+      router.push({
+        name: 'AddressList'
+      })
+    }).catch(() => {});
+    return
+  }
+
+  const addressId = addressRes.data[0].id
+  // 创建订单
+  const saleOrderDetailList = checkedProduct.map(item => {
+    return {
+      price: item.salePrice,
+      productId: item.productId,
+      qty: item.qty
+    }
+  })
+  save_order({
+    saleOrderDetailList: saleOrderDetailList,
+    walletAddress: '',
+    userAddressId: addressId,
+    userId: userInfo.value?.id
+  }).then(async res => {
+    if (res.code === '0') {
+      const orderId = res.data.id
+      router.push({
+        name: 'OrderConfirm',
+        query:{
+          orderId: orderId
+        }
+      })
+    }
+  })
 }
 
 function goHome() {

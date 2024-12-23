@@ -16,15 +16,15 @@ const userStore = useUserStore()
 
 onMounted(() => {
   if (!userStore.userInfo?.id) {
-    window.location.href = 'https://t.me/tg_ecommerce_bot?startapp'
+    // window.location.href = 'https://t.me/tg_ecommerce_bot?startapp'
     return
   }
-  const currentShopId = location.pathname.split('/')[1]
-  if (!currentShopId) {
-    return
-  }
+  // const currentShopId = location.pathname.split('/')[1]
+  // if (!currentShopId) {
+  //   return
+  // }
 
-  // const currentShopId = 'eNhH18azu1urGKuqZhP0'
+  const currentShopId = 'eNhH18azu1urGKuqZhP0'
 
   if (userStore.shopId !== currentShopId) {
     userStore.setShopId(currentShopId)
