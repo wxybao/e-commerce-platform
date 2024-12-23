@@ -2,12 +2,8 @@
   <div class="home">
     <div class="home-content">
       <van-swipe class="swipe" :autoplay="3000">
-        <van-swipe-item>
-          <div class="text-desc">Раскрой рекламу <br/>с помощью <br/>роккеткартинга!</div>
-          <img src="../assets/banner-1.png"/>
-        </van-swipe-item>
-        <van-swipe-item>
-          <img src="../assets/banner-2.png"/>
+        <van-swipe-item v-for="item in topProducts" :key="item.id">
+          <img :src="item.masterImageUrl"/>
         </van-swipe-item>
       </van-swipe>
 
@@ -17,9 +13,9 @@
         <van-col span="12" v-for="item in productList" :key="item.id">
           <div class="flex-1 goods-card" @click="gotoDetail(item.id)">
             <div class="img-box"><img :src="item.masterImageUrl"/></div>
-            <div class="goods-title overflowText">{{item.name}}</div>
-            <div class="goods-price">${{item.salePrice}} USDT</div>
-            <div class="goods-price-line">${{item.marketPrice}} USDT</div>
+            <div class="goods-title overflowText">{{ item.name }}</div>
+            <div class="goods-price">${{ item.salePrice }} USDT</div>
+            <div class="goods-price-line">${{ item.marketPrice }} USDT</div>
             <van-button class="buy-btn" type="primary">Купить</van-button>
           </div>
         </van-col>
@@ -48,6 +44,7 @@ const router = useRouter()
 const activeTab = ref('Home')
 const pageInfo = ref({})
 const productList = ref([])
+const topProducts = ref([])
 
 onMounted(() => {
   getInit()
@@ -63,14 +60,26 @@ async function getInit() {
 }
 
 async function getProducts() {
+  topProducts.value = []
+  productList.value = []
+
   const res = await product_list({
     limit: 1000,
-    offset: 0,
-    topIs: true
+    offset: 0
   })
 
   if (res.code === '0') {
-    productList.value = res.data || []
+    const products = res.data || []
+    products.forEach(item => {
+      if (item.topIs) {
+        topProducts.value.push(item)
+      } else {
+        productList.value.push(item)
+      }
+    })
+
+    topProducts.value.sort((a, b) => b.sort - a.sort)
+    productList.value.sort((a, b) => b.sort - a.sort)
   }
 }
 
@@ -128,7 +137,7 @@ function gotoDetail(id) {
       text-align: center;
     }
 
-    .product-box{
+    .product-box {
       display: flex;
       flex-wrap: wrap;
       gap: 20px;
@@ -175,10 +184,10 @@ function gotoDetail(id) {
       }
     }
 
-    .home-img{
+    .home-img {
       margin-top: 20px;
 
-      img{
+      img {
         width: 100%;
         object-fit: cover;
       }
