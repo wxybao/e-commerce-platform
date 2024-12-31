@@ -8,7 +8,8 @@
         <van-empty :image-size="160" description="Адрес не добавлен."/>
       </template>
       <template v-else>
-        <AddressItem @click="chooseAddress(address)" v-for="address in addressList" :address="address" :key="address.id" @del="delAddressList"/>
+        <AddressItem @click="chooseAddress(address)" v-for="address in addressList" :address="address" :key="address.id"
+                     @del="delAddressList"/>
       </template>
     </div>
     <div class="add-address flex-left" @click="gotoUrl()"><img src="../assets/add.png"/>Добавить адрес</div>
@@ -74,11 +75,13 @@ function gotoUrl() {
 }
 
 function chooseAddress(detail) {
-  if(from){
+  if (from) {
+    const params = JSON.parse(from)
     router.push({
-      name: 'OrderConfirm',
+      name: params.from,
       query: {
-        addressId: detail.id
+        addressId: detail.id,
+        ...params.query
       }
     })
   }

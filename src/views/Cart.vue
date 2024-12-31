@@ -16,7 +16,7 @@
             </span>
             </div>
             <div class="product-info flex-1">
-              <div class="name overflowText-2">{{ item.productName }}</div>
+              <div class="name overflowText-2 mb-8">{{ item.productName }}</div>
               <van-stepper v-model="item.qty" :min="1" :max="99"
                            button-size="24px" :disabled="item.productState !== 'ONLINE'"
                            input-width="50px" integer @change="productNumChange(item)"/>
@@ -24,7 +24,7 @@
             </div>
           </div>
           <template #right>
-            <van-button square text="删除" type="danger" class="delete-button" @click="delProduct(item)"/>
+            <van-button square text="删除" type="danger" class="delete-button" @click="delProduct([item])"/>
           </template>
         </van-swipe-cell>
       </template>
@@ -84,6 +84,10 @@ async function getCart() {
   const res = await get_cart(userInfo.value?.id)
   if (res.code === '0') {
     productList.value = res.data?.shoppingCartDetailList || []
+
+    if(productList.value.length){
+      checkedResultChange(productList.value[0])
+    }
   }
 }
 
@@ -111,17 +115,20 @@ const checkedResultChange = (product) => {
   productNumChange(product)
 }
 
-async function delProduct(item) {
+async function delProduct(items,hideToast = false) {
   const res = await del_cart_product({
-    shoppingCartDetailList: [item],
+    shoppingCartDetailList: items,
     userId: userInfo.value?.id
   })
 
   if (res.code === '0') {
-    showSuccessToast('Удалить успешно')
-    const index = productList.value.findIndex(i => i.productId === item.productId)
-    if (index !== -1) {
-      productList.value.splice(index, 1)
+    if(!hideToast){
+      showSuccessToast('Удалить успешно')
+
+      const index = productList.value.findIndex(i => i.productId === item.productId)
+      if (index !== -1) {
+        productList.value.splice(index, 1)
+      }
     }
   }
 }
@@ -198,6 +205,9 @@ const orderConfirm = async () => {
   }).then(async res => {
     if (res.code === '0') {
       const orderId = res.data.id
+
+      delProduct(saleOrderDetailList,true)
+
       router.push({
         name: 'OrderConfirm',
         query:{

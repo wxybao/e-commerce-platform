@@ -2,7 +2,7 @@
   <div class="home">
     <div class="home-content">
       <van-swipe class="swipe" :autoplay="3000">
-        <van-swipe-item v-for="item in topProducts" :key="item.id">
+        <van-swipe-item v-for="item in topProducts" :key="item.id" @click="gotoDetail(item.id)">
           <img :src="item.masterImageUrl"/>
         </van-swipe-item>
       </van-swipe>
@@ -108,7 +108,7 @@ function gotoDetail(id) {
 
       img {
         width: 100%;
-        height: 343px;
+        height: calc(100vw - 32px);
         object-fit: cover;
       }
 
@@ -153,7 +153,7 @@ function gotoDetail(id) {
         padding: 16px 8px;
 
         img {
-          height: 119px;
+          height: calc((100vw - 32px - 16px) / 2 - 32px);
           max-width: 100%;
           margin: 0 auto;
         }

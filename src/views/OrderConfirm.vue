@@ -12,12 +12,12 @@
     <div class="product-list mt-40">
       <div class="product-item flex-left" v-for="item in products">
         <div class="product-img">
-          <img src="../assets/goods-1.png"/>
+          <img :src="item.productMasterImageUrl"/>
         </div>
         <div class="product-info flex-1">
           <div class="name overflowText-2">{{ item.productName }}</div>
           <div class="flex-between">
-            <div class="name price">${{ item.salePrice }} USDT</div>
+            <div class="name price">${{ item.price }} USDT</div>
             <div class="num">×{{ item.qty }}</div>
           </div>
         </div>
@@ -25,7 +25,7 @@
     </div>
 
     <div class="send-money-box">
-      <div class="send-money">почтовый сбор：$160.00 USDT</div>
+      <div class="send-money">почтовый сбор：${{orderDetail.freight}} USDT</div>
       <div class="send-msg flex-left" @click="contact()">
         <span>Вам необходимо обратиться в службу поддержки для изменения почтового сбора</span>
         <div class="right-arrow flex-center">
@@ -62,7 +62,7 @@
 
 import {useRoute, useRouter} from "vue-router";
 import {onMounted, ref} from "vue";
-import {get_order, pay, save_order, user_address, wallet_address} from "@/api/api.js";
+import {get_order, pay, updOrder, user_address, wallet_address} from "@/api/api.js";
 import {showSuccessToast, showToast} from "vant";
 import AddressItem from "@/components/AddressItem.vue";
 import tonConnectUI from "@/ton/index.js";
@@ -78,7 +78,7 @@ const route = useRoute()
 
 const orderId = Number(route.query.orderId || 0)
 
-let addressDetail = {}
+let orderDetail = {}
 const products = ref([])
 const address = ref({})
 const addressId = Number(route.query.addressId || 0)
@@ -106,11 +106,11 @@ async function getDetail() {
   const res = await get_order(orderId)
 
   if (res.code === '0') {
-    addressDetail = res.data || {}
+    orderDetail = res.data || {}
 
-    products.value = addressDetail.saleOrderDetailList || []
+    products.value = orderDetail.saleOrderDetailList || []
 
-    totalPrice.value = addressDetail.money
+    totalPrice.value = orderDetail.money
 
     getAddressList(addressId || res.data?.userAddressId || 0)
   } else {
@@ -131,6 +131,27 @@ function getAddressList(addressId) {
       if (addressList.length) {
         if (addressId) {
           address.value = addressList.find(item => item.id === addressId)
+
+          // 更新订单的地址
+          if(addressId !== orderDetail.userAddressId){
+            updOrder({
+              id: orderId,
+              userAddressId: addressId,
+              userId: userInfo.value?.id || 0
+            }).then(res => {
+              if (res.code !== "0") {
+                showToast({
+                  message: err.msg,
+                  wordBreak: 'break-word',
+                })
+              }
+            }).catch(err => {
+              showToast({
+                message: err.data[0].message,
+                wordBreak: 'break-word',
+              })
+            })
+          }
         } else {
           address.value = addressList[0]
         }
@@ -149,7 +170,10 @@ function changeAddress() {
   router.push({
     name: 'AddressList',
     query: {
-      from: 'ConfirmOrder'
+      from:JSON.stringify({
+        query:{orderId},
+        from: 'OrderConfirm'
+      })
     }
   })
 }
@@ -162,20 +186,18 @@ async function orderConfirm() {
   const currentIsConnectedStatus = tonConnectUI.connected;
 
   if (currentIsConnectedStatus) {
-    await setTransaction()
+    if(!orderDetail.jettonWalletAddress){
+      setWalletAddress(tonConnectUI.wallet)
+    }else{
+      await setTransaction(orderDetail.jettonWalletAddress)
+    }
   } else {
     try {
-      const res = await tonConnectUI.openModal()
+      await tonConnectUI.openModal()
 
       const unsubscribe = tonConnectUI.onStatusChange((wallet) => {
         if (wallet && tonConnectUI.connected) {
-          wallet_address({
-            walletAddress: wallet.account.address,
-            id: userInfo.value?.id
-          })
-
-          setTransaction()
-
+          setWalletAddress(wallet)
           unsubscribe()
         }
       });
@@ -186,12 +208,23 @@ async function orderConfirm() {
   }
 }
 
-async function setTransaction() {
+function setWalletAddress(wallet) {
+  wallet_address({
+    walletAddress: wallet.account.address,
+    id: userInfo.value?.id
+  }).then(pay=>{
+    if(pay.code === '0'){
+      setTransaction(pay.data.jettonWalletAddress)
+    }
+  })
+}
+
+async function setTransaction(jettonWalletAddress) {
   loading.value = true
 
   const res = await pay({
     userId: userInfo.value?.id,
-    walletAddress: addressDetail.jettonWalletAddress,
+    walletAddress: jettonWalletAddress,
     id: orderId
   })
 

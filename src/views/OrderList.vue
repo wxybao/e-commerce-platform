@@ -31,10 +31,12 @@
           <div class="product-list">
             <template v-if="item.saleOrderDetailList && item.saleOrderDetailList.length">
               <div class="product-item" v-for="(product, index) in item.saleOrderDetailList" :key="index">
-                <img src="../assets/goods-1.png"/>
+                <img :src="product.productMasterImageUrl"/>
                 <van-row class="mt-10">
                   <van-col span="12" class="item-label">Заказ #</van-col>
-                  <van-col span="12" class="item-content">{{ product.productName }}</van-col>
+                  <van-col span="12" class="item-content">
+                    <span class="overflowText-2">{{ product.productName }}</span>
+                  </van-col>
                 </van-row>
                 <van-row class="mt-10">
                   <van-col span="12" class="item-label">Итог</van-col>
@@ -50,7 +52,7 @@
 
           <template v-if="item.state === 'UN_PAY'">
             <div class="pay-box flex-between">
-              <span>итого：${{ item.money }} USDT</span>
+              <span>итого：${{ item.money }}+${{ item.freight }} USDT</span>
               <van-button class="ok-btn" type="primary" @click="gotoPay(item)">расчет</van-button>
             </div>
           </template>
@@ -63,7 +65,7 @@
 
 <script setup>
 import {onMounted, ref} from "vue";
-import {pay, sale_order, wallet_address} from "@/api/api.js";
+import {get_orders, pay, wallet_address} from "@/api/api.js";
 import {showSuccessToast, showToast} from "vant";
 import NavBar from "@/components/NavBar.vue";
 import {useUserStore} from "@/stores/user.js";
@@ -84,7 +86,7 @@ onMounted(() => {
 
 function getOrderList() {
   loading.value = true
-  sale_order({
+  get_orders({
     limit: 100,
     offset: pageIndex,
     userId: userInfo.value?.id || 0
@@ -107,19 +109,18 @@ async function gotoPay(item) {
   const currentIsConnectedStatus = tonConnectUI.connected;
 
   if (currentIsConnectedStatus) {
-    setTransaction(item)
+    if (!item.jettonWalletAddress) {
+      setWalletAddress(item, tonConnectUI.wallet)
+    } else {
+      await setTransaction(item, item.jettonWalletAddress)
+    }
   } else {
     try {
-      const res = await tonConnectUI.openModal()
+      await tonConnectUI.openModal()
 
       const unsubscribe = tonConnectUI.onStatusChange((wallet) => {
         if (wallet && tonConnectUI.connected) {
-          wallet_address({
-            walletAddress: wallet.account.address,
-            id: userInfo.value?.id
-          })
-
-          setTransaction(item)
+          setWalletAddress(item, wallet)
 
           unsubscribe()
         }
@@ -131,10 +132,21 @@ async function gotoPay(item) {
   }
 }
 
-async function setTransaction(item) {
+function setWalletAddress(item, wallet) {
+  wallet_address({
+    walletAddress: wallet.account.address,
+    id: userInfo.value?.id
+  }).then(pay => {
+    if (pay.code === '0') {
+      setTransaction(item, pay.data.jettonWalletAddress)
+    }
+  })
+}
+
+async function setTransaction(item, jettonWalletAddress) {
   const res = await pay({
     userId: userInfo.value?.id,
-    walletAddress: item.jettonWalletAddress,
+    walletAddress: jettonWalletAddress,
     id: item.id
   })
 

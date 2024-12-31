@@ -28,8 +28,8 @@
 
       <div class="product-desc">{{ productDetail.shortIntro }}</div>
     </div>
-    <div class="product-info" v-if="productDetail.introImgList && productDetail.introImgList.length">
-      <img v-for="item in productDetail.introImgList" :src="item"/>
+    <div class="product-info" v-if="productDetail.productImageList && productDetail.productImageList.length">
+      <img v-for="item in productDetail.productImageList" :src="item.imageUrl"/>
     </div>
 
     <PageFooter/>
@@ -132,7 +132,7 @@ function shareProduct(){
   position: relative;
 
   .van-swipe {
-    height: 100%;
+    height: 100vw;
   }
 
   img {

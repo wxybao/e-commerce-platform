@@ -2,7 +2,7 @@ import request from '@/request.js'
 
 //商城
 const shopUrl = '/shop-server/'
-export const sale_order = (params) => {
+export const get_orders = (params) => {
   return request({ url: shopUrl + 'sale_order/', method: 'get', params: params })
 }
 export const save_order = (params) => {
@@ -19,6 +19,9 @@ export const pay = (params) => {
 }
 export const get_order = (params) => {
   return request({ url: shopUrl + 'sale_order/' + params, method: 'get' })
+}
+export const updOrder = (params) => {
+  return request({ url: shopUrl + 'sale_order/', method: 'put', data: params })
 }
 
 
