@@ -4,7 +4,7 @@ import {useUserStore} from "@/stores/user.js";
 const service = axios.create({
   // baseURL: '/api',
   baseURL: 'https://www.xjtd.store',
-  withCredentials: true,
+  withCredentials: false,
   timeout: 10000,
   headers: {'Content-Type': 'application/json'}
 })

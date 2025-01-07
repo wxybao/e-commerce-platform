@@ -133,14 +133,15 @@ async function gotoPay(item) {
 }
 
 function setWalletAddress(item, wallet) {
-  wallet_address({
-    walletAddress: wallet.account.address,
-    id: userInfo.value?.id
-  }).then(pay => {
-    if (pay.code === '0') {
-      setTransaction(item, pay.data.jettonWalletAddress)
-    }
-  })
+  // wallet_address({
+  //   walletAddress: wallet.account.address,
+  //   id: userInfo.value?.id
+  // }).then(pay => {
+  //   if (pay.code === '0') {
+  //     setTransaction(item, pay.data.jettonWalletAddress)
+  //   }
+  // })
+  setTransaction(item, wallet.account.address)
 }
 
 async function setTransaction(item, jettonWalletAddress) {
@@ -151,12 +152,37 @@ async function setTransaction(item, jettonWalletAddress) {
   })
 
   if (res.code === '0') {
-    showSuccessToast({
-      message: 'Оплата прошла успешно',
-      wordBreak: 'break-word',
-    })
+    // showSuccessToast({
+    //   message: 'Оплата прошла успешно',
+    //   wordBreak: 'break-word',
+    // })
 
-    getOrderList()
+    const transaction = {
+      validUntil: Math.floor(Date.now() / 1000) + 60,
+      messages: [
+        {
+          address: res.data.jettonWalletAddress,
+          amount: "50000000",
+          payload: res.data.idBase64
+        }
+      ]
+    }
+
+    const result = await tonConnectUI.sendTransaction(transaction);
+
+    if (result.boc) {
+      showToast({
+        message: 'Оплата успешно произведена, ожидается подтверждение получения на блокчейне.',
+        wordBreak: 'normal',
+        duration: 5000
+      })
+
+      setTimeout(() => {
+        getOrderList()
+      },5000)
+    }
+
+
   }
 }
 </script>

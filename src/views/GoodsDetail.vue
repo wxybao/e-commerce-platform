@@ -28,8 +28,8 @@
 
       <div class="product-desc">{{ productDetail.shortIntro }}</div>
     </div>
-    <div class="product-info" v-if="productDetail.productImageList && productDetail.productImageList.length">
-      <img v-for="item in productDetail.productImageList" :src="item.imageUrl"/>
+    <div class="product-info" v-if="productDetail.introImgList && productDetail.introImgList.length">
+      <img v-for="item in productDetail.introImgList" :src="item.imageUrl"/>
     </div>
 
     <PageFooter/>
@@ -121,8 +121,9 @@ async function addToCart() {
 
 // 分享按钮点击
 function shareProduct(){
-  const url = window.location.href
-  window.open(`https://t.me/share/url?url=${url}&text=${productDetail.value.shortIntro}`, '_blank')
+  // const url = window.location.href
+  // window.open(`https://t.me/share/url?url=${url}&text=${productDetail.value.shortIntro}`)
+  // const telegramUrl = `https://t.me/yiliniunai_bot?startapp`;
 }
 </script>
 

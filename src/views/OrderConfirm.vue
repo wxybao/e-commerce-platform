@@ -62,8 +62,8 @@
 
 import {useRoute, useRouter} from "vue-router";
 import {onMounted, ref} from "vue";
-import {get_order, pay, updOrder, user_address, wallet_address} from "@/api/api.js";
-import {showSuccessToast, showToast} from "vant";
+import {get_order, pay, updOrder, user_address} from "@/api/api.js";
+import {showToast} from "vant";
 import AddressItem from "@/components/AddressItem.vue";
 import tonConnectUI from "@/ton/index.js";
 import NavBar from "@/components/NavBar.vue";
@@ -110,7 +110,7 @@ async function getDetail() {
 
     products.value = orderDetail.saleOrderDetailList || []
 
-    totalPrice.value = orderDetail.money
+    totalPrice.value = (Number(orderDetail.money) + Number(orderDetail.freight)).toFixed(2)
 
     getAddressList(addressId || res.data?.userAddressId || 0)
   } else {
@@ -179,7 +179,7 @@ function changeAddress() {
 }
 
 function contact() {
-  window.open('https://t.me/RedRocketSupport', '_blank')
+  window.open('https://t.me/RedRocketSupport')
 }
 
 async function orderConfirm() {
@@ -209,14 +209,15 @@ async function orderConfirm() {
 }
 
 function setWalletAddress(wallet) {
-  wallet_address({
-    walletAddress: wallet.account.address,
-    id: userInfo.value?.id
-  }).then(pay=>{
-    if(pay.code === '0'){
-      setTransaction(pay.data.jettonWalletAddress)
-    }
-  })
+  // wallet_address({
+  //   walletAddress: wallet.account.address,
+  //   id: userInfo.value?.id
+  // }).then(pay=>{
+  //   if(pay.code === '0'){
+  //     setTransaction(pay.data.jettonWalletAddress)
+  //   }
+  // })
+  setTransaction(wallet.account.address)
 }
 
 async function setTransaction(jettonWalletAddress) {
@@ -231,16 +232,37 @@ async function setTransaction(jettonWalletAddress) {
   loading.value = false
 
   if (res.code === '0') {
-    showSuccessToast({
-      message: 'Оплата прошла успешно',
-      wordBreak: 'break-word',
-    })
+    // showSuccessToast({
+    //   message: 'Оплата прошла успешно',
+    //   wordBreak: 'break-word',
+    // })
 
-    setTimeout(()=>{
-      router.replace({
-        name: 'OrderList',
+    const transaction = {
+      validUntil: Math.floor(Date.now() / 1000) + 60,
+      messages: [
+        {
+          address: res.data.jettonWalletAddress,
+          amount: "50000000",
+          payload: res.data.idBase64
+        }
+      ]
+    }
+
+    const result = await tonConnectUI.sendTransaction(transaction);
+
+    if (result.boc) {
+      showToast({
+        message: 'Оплата успешно произведена, ожидается подтверждение получения на блокчейне.',
+        wordBreak: 'normal',
+        duration: 5000
       })
-    },3000)
+
+      setTimeout(() => {
+        router.push({
+          name: 'OrderList'
+        })
+      },5000)
+    }
   }
 }
 </script>

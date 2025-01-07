@@ -152,7 +152,7 @@ async function getAvatar() {
 function gotoUrl(path) {
   if (path) {
     if (path.indexOf('http') === 0) {
-      window.open(path, '_blank')
+      window.open(path)
     } else {
       router.push({name: path})
     }

@@ -6,7 +6,7 @@
     <div class="line"></div>
 
     <div class="text-12">
-      <span class="color1">Copyright © 2024</span>
+      <span class="color1">Copyright © 2025</span>
       <span class="color2"> TG E-Commerce</span>
     </div>
   </div>
