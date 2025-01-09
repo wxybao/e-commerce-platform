@@ -1,7 +1,7 @@
 <template>
   <div class="order-list">
     <NavBar/>
-    <div class="flex-between">
+    <div class="flex-between" style="padding: 0 24px">
       <div class="page-title">Заказы</div>
 
       <van-button style="width: 120px" size="small" :loading="loading" plain icon="replay" type="primary"
@@ -26,7 +26,8 @@
           </div>
           <div>
             номер заказа：{{ item.orderNo }} <br/>
-            Дата заказа：{{ item.createdAt }}
+            Дата заказа：{{ item.createdAt }} <br />
+            почтовые расходы：${{ item.freight }} USDT
           </div>
           <div class="product-list">
             <template v-if="item.saleOrderDetailList && item.saleOrderDetailList.length">
@@ -52,7 +53,7 @@
 
           <template v-if="item.state === 'UN_PAY'">
             <div class="pay-box flex-between">
-              <span>итого：${{ item.money }}+${{ item.freight }} USDT</span>
+              <span>итого：${{ Number(item.money + item.freight).toFixed(2) }} USDT</span>
               <van-button class="ok-btn" type="primary" @click="gotoPay(item)">расчет</van-button>
             </div>
           </template>
@@ -65,12 +66,14 @@
 
 <script setup>
 import {onMounted, ref} from "vue";
-import {get_orders, pay, wallet_address} from "@/api/api.js";
-import {showSuccessToast, showToast} from "vant";
+import {get_orders} from "@/api/api.js";
+import { showToast} from "vant";
 import NavBar from "@/components/NavBar.vue";
 import {useUserStore} from "@/stores/user.js";
 import {storeToRefs} from "pinia";
-import tonConnectUI from "@/ton/index.js";
+import {useRouter} from "vue-router";
+
+const router = useRouter()
 
 const userStore = useUserStore()
 const {userInfo} = storeToRefs(userStore)
@@ -105,104 +108,35 @@ function getOrderList() {
   })
 }
 
-async function gotoPay(item) {
-  const currentIsConnectedStatus = tonConnectUI.connected;
-
-  if (currentIsConnectedStatus) {
-    if (!item.jettonWalletAddress) {
-      setWalletAddress(item, tonConnectUI.wallet)
-    } else {
-      await setTransaction(item, item.jettonWalletAddress)
+function gotoPay(item) {
+  router.push({
+    name: 'OrderConfirm',
+    query:{
+      orderId: item.id
     }
-  } else {
-    try {
-      await tonConnectUI.openModal()
-
-      const unsubscribe = tonConnectUI.onStatusChange((wallet) => {
-        if (wallet && tonConnectUI.connected) {
-          setWalletAddress(item, wallet)
-
-          unsubscribe()
-        }
-      });
-    } catch (e) {
-      console.log(e)
-    } finally {
-    }
-  }
-}
-
-function setWalletAddress(item, wallet) {
-  // wallet_address({
-  //   walletAddress: wallet.account.address,
-  //   id: userInfo.value?.id
-  // }).then(pay => {
-  //   if (pay.code === '0') {
-  //     setTransaction(item, pay.data.jettonWalletAddress)
-  //   }
-  // })
-  setTransaction(item, wallet.account.address)
-}
-
-async function setTransaction(item, jettonWalletAddress) {
-  const res = await pay({
-    userId: userInfo.value?.id,
-    walletAddress: jettonWalletAddress,
-    id: item.id
   })
-
-  if (res.code === '0') {
-    // showSuccessToast({
-    //   message: 'Оплата прошла успешно',
-    //   wordBreak: 'break-word',
-    // })
-
-    const transaction = {
-      validUntil: Math.floor(Date.now() / 1000) + 60,
-      messages: [
-        {
-          address: res.data.jettonWalletAddress,
-          amount: "50000000",
-          payload: res.data.idBase64
-        }
-      ]
-    }
-
-    const result = await tonConnectUI.sendTransaction(transaction);
-
-    if (result.boc) {
-      showToast({
-        message: 'Оплата успешно произведена, ожидается подтверждение получения на блокчейне.',
-        wordBreak: 'normal',
-        duration: 5000
-      })
-
-      setTimeout(() => {
-        getOrderList()
-      },5000)
-    }
-
-
-  }
 }
 </script>
 
 <style scoped lang="scss">
 .order-list {
-  padding: 20px 24px;
+  padding: 20px 0px;
+  background: #F5F5F5;
 
   .orders {
-    margin-top: 25px;
+    margin-top: 20px;
 
     .order-item {
-      padding: 20px 0 0 0;
+      padding: 24px;
+      padding-bottom: 0;
+      background: #FFFFFF;
       position: relative;
 
       .status-text {
         position: absolute;
         z-index: 2;
-        top: 0;
-        right: 0;
+        top: 40px;
+        right: 24px;
         color: #F55266;
         text-align: center;
         font-size: 20px;
@@ -260,6 +194,7 @@ async function setTransaction(item, jettonWalletAddress) {
         border-top: 1px solid #E0E5EB;
         padding-top: 20px;
         font-weight: bold;
+        padding-bottom: 24px;
 
         .ok-btn {
           height: 40px;

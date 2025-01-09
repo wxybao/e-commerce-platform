@@ -38,9 +38,12 @@ import TabBar from "@/components/TabBar.vue";
 import {onMounted, ref} from "vue";
 import {useRouter} from "vue-router";
 import {product_list, shop_info} from "@/api/api.js";
+import {useUserStore} from "@/stores/user.js";
 
 const router = useRouter()
 
+const userStore = useUserStore()
+const {pathProductId, setPathProductId} = userStore
 const activeTab = ref('Home')
 const pageInfo = ref({})
 const productList = ref([])
@@ -49,6 +52,13 @@ const topProducts = ref([])
 onMounted(() => {
   getInit()
   getProducts()
+  if (window.Telegram) {
+    const productId = Number(window.Telegram.WebApp.initDataUnsafe?.start_param || 0)
+    if (productId !== pathProductId) {
+      setPathProductId(productId)
+      gotoDetail(productId)
+    }
+  }
 })
 
 async function getInit() {

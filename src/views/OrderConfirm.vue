@@ -2,14 +2,14 @@
   <div class="confirm-order">
     <NavBar/>
 
-    <div class="flex-between" @click="changeAddress()">
+    <div class="flex-between white-bg" @click="changeAddress()">
       <AddressItem v-if="address" only-show :address="address"/>
       <div class="change-arrow flex-center">
         <van-icon name="arrow"/>
       </div>
     </div>
 
-    <div class="product-list mt-40">
+    <div class="product-list white-bg mt-20">
       <div class="product-item flex-left" v-for="item in products">
         <div class="product-img">
           <img :src="item.productMasterImageUrl"/>
@@ -24,7 +24,7 @@
       </div>
     </div>
 
-    <div class="send-money-box">
+    <div class="send-money-box white-bg">
       <div class="send-money">почтовый сбор：${{orderDetail.freight}} USDT</div>
       <div class="send-msg flex-left" @click="contact()">
         <span>Вам необходимо обратиться в службу поддержки для изменения почтового сбора</span>
@@ -32,9 +32,12 @@
           <van-icon name="down"/>
         </div>
       </div>
+      <div class="flex-left">
+        номер заказа：{{orderDetail.orderNo}}<IconParkSolidCopy class="ml-20" @click="copy()"/>
+      </div>
     </div>
 
-    <div class="pay-type-box">
+    <div class="pay-type-box white-bg">
       <van-radio-group v-model="payType">
         <van-radio class="pay-item" name="TonWallet" label-position="left">
           <div class="flex-left">
@@ -69,6 +72,7 @@ import tonConnectUI from "@/ton/index.js";
 import NavBar from "@/components/NavBar.vue";
 import {useUserStore} from "@/stores/user.js";
 import {storeToRefs} from "pinia";
+import IconParkSolidCopy from "@/assets/svg/IconParkSolidCopy.vue";
 
 const userStore = useUserStore()
 const {userInfo} = storeToRefs(userStore)
@@ -171,11 +175,37 @@ function changeAddress() {
     name: 'AddressList',
     query: {
       from:JSON.stringify({
-        query:{orderId},
+        query:{
+          addressId: address.value.id,
+          orderId
+        },
         from: 'OrderConfirm'
       })
     }
   })
+}
+
+function copy() {
+  setCopy(orderDetail.orderNo)
+  showToast({
+    message: 'Копирование успешно',
+    wordBreak: 'break-word',
+  })
+}
+
+function setCopy(copyData){
+  const input = document.createElement('input');
+
+  let textToCopy = copyData || '';
+  if (typeof textToCopy !== 'string') {
+    textToCopy = String(textToCopy);
+  }
+
+  input.value = textToCopy;
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand('Copy');
+  document.body.removeChild(input);
 }
 
 function contact() {
@@ -269,9 +299,14 @@ async function setTransaction(jettonWalletAddress) {
 
 <style scoped lang="scss">
 .confirm-order {
-  padding: 24px;
-  padding-bottom: 70px;
+  padding-bottom: 90px;
   position: relative;
+  background: #F5F5F5;
+
+  .white-bg{
+    background: #ffffff;
+    padding: 24px;
+  }
 
   .change-arrow {
     margin-left: 20px;
@@ -283,6 +318,9 @@ async function setTransaction(jettonWalletAddress) {
   }
 
   .product-list {
+    padding-top: 0;
+    padding-bottom: 0;
+
     .product-item {
       padding: 20px 0;
       gap: 20px;
@@ -327,7 +365,6 @@ async function setTransaction(jettonWalletAddress) {
   }
 
   .send-money-box {
-    padding: 24px 0;
     margin-top: 20px;
 
     .send-money {
@@ -338,7 +375,7 @@ async function setTransaction(jettonWalletAddress) {
 
     .send-msg {
       background-color: #FEEEF0;
-      margin-top: 8px;
+      margin: 16px 0;
       padding: 8px 10px;
       color: #F53F3F;
       line-height: 20px;
@@ -358,6 +395,8 @@ async function setTransaction(jettonWalletAddress) {
   }
 
   .pay-type-box {
+    padding-bottom: 0px;
+    padding-top: 0px;
     margin-top: 20px;
 
     .pay-item {

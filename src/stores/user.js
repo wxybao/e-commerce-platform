@@ -20,7 +20,8 @@ import {defineStore} from 'pinia'
 export const useUserStore = defineStore('user', {
   state: () => ({
     user: window.Telegram?.WebApp.initDataUnsafe,
-    shopId: ''
+    shopId: '',
+    pathProductId: 0
   }),
   getters: {
     // userInfo: state => {
@@ -33,6 +34,9 @@ export const useUserStore = defineStore('user', {
   actions: {
     setShopId(shopId) {
       this.shopId = shopId
+    },
+    setPathProductId(pathProductId) {
+      this.pathProductId = pathProductId
     }
   },
   persist: {
@@ -40,7 +44,7 @@ export const useUserStore = defineStore('user', {
     strategies: [
       {
         storage: localStorage,
-        paths: ['shopId']
+        paths: ['shopId','pathProductId']
       }
     ]
   }

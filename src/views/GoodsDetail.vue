@@ -123,7 +123,8 @@ async function addToCart() {
 function shareProduct(){
   // const url = window.location.href
   // window.open(`https://t.me/share/url?url=${url}&text=${productDetail.value.shortIntro}`)
-  // const telegramUrl = `https://t.me/yiliniunai_bot?startapp`;
+  const telegramUrl = `https://t.me/${'yiliniunai_bot'}?startapp=${productDetail.value.id}`;
+  window.open(`https://t.me/share/url?url=${telegramUrl}&text=${productDetail.value.name}`)
 }
 </script>
 

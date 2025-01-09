@@ -8,7 +8,8 @@
         <van-empty :image-size="160" description="Адрес не добавлен."/>
       </template>
       <template v-else>
-        <AddressItem @click="chooseAddress(address)" v-for="address in addressList" :address="address" :key="address.id"
+        <AddressItem @click="chooseAddress(address)"
+                     v-for="address in addressList" :address="address" :key="address.id" :addressId="addressId"
                      @del="delAddressList"/>
       </template>
     </div>
@@ -31,6 +32,11 @@ const userStore = useUserStore()
 const {userInfo} = storeToRefs(userStore)
 
 const from = route.query?.from || ''
+let addressId = 0
+if (from) {
+  const params = JSON.parse(from)
+  addressId = params.query.addressId || 0
+}
 
 const router = useRouter()
 const hasInit = ref(false)
@@ -80,8 +86,8 @@ function chooseAddress(detail) {
     router.push({
       name: params.from,
       query: {
+        ...params.query,
         addressId: detail.id,
-        ...params.query
       }
     })
   }
