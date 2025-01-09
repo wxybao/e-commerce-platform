@@ -42,8 +42,6 @@ import {useUserStore} from "@/stores/user.js";
 
 const router = useRouter()
 
-const userStore = useUserStore()
-const {pathProductId, setPathProductId} = userStore
 const activeTab = ref('Home')
 const pageInfo = ref({})
 const productList = ref([])
@@ -54,8 +52,8 @@ onMounted(() => {
   getProducts()
   if (window.Telegram) {
     const productId = Number(window.Telegram.WebApp.initDataUnsafe?.start_param || 0)
-    if (productId !== pathProductId) {
-      setPathProductId(productId)
+    if (productId) {
+      delete window.Telegram.WebApp.initDataUnsafe.start_param
       gotoDetail(productId)
     }
   }
