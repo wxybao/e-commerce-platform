@@ -61,3 +61,7 @@ export const get_cart = (params) => {
 export const del_cart_product = (params) => {
   return request({ url: shopUrl + 'shopping_cart/', method: 'delete', data: params })
 }
+
+export const getMerchant = (params) => {
+  return request({ url: shopUrl + 'merchant/read_for_shop', method: 'get', data: params })
+}

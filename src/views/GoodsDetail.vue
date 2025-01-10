@@ -41,7 +41,7 @@ import PageFooter from "@/components/PageFooter.vue";
 import {onMounted, ref} from "vue";
 import {useRoute} from "vue-router";
 import NavBar from "@/components/NavBar.vue";
-import {add_cart, get_cart, product_detail} from "@/api/api.js";
+import {add_cart, get_cart, getMerchant, product_detail} from "@/api/api.js";
 import {storeToRefs} from "pinia";
 import {useUserStore} from "@/stores/user.js";
 import {showFailToast, showSuccessToast} from "vant";
@@ -120,11 +120,13 @@ async function addToCart() {
 }
 
 // 分享按钮点击
-function shareProduct(){
-  // const url = window.location.href
-  // window.open(`https://t.me/share/url?url=${url}&text=${productDetail.value.shortIntro}`)
-  const telegramUrl = `https://t.me/${'yiliniunai_bot'}?startapp=${productDetail.value.id}`;
-  window.open(`https://t.me/share/url?url=${telegramUrl}&text=${productDetail.value.name}`)
+async function shareProduct() {
+  const res = await getMerchant()
+
+  if (res.code === '0') {
+    const telegramUrl = `https://t.me/${res.data.tgUsername}?startapp=${productDetail.value.id}`;
+    window.open(`https://t.me/share/url?url=${telegramUrl}&text=${productDetail.value.name}`)
+  }
 }
 </script>
 
