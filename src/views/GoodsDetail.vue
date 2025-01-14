@@ -21,7 +21,7 @@
       <div class="product-price">${{ productDetail.salePrice }} USDT</div>
 
       <div class="flex-between mt-20">
-        <van-stepper v-model="productNum" :min="1" :max="99" button-size="44px" input-width="70px" integer
+        <van-stepper v-model="productNum" :min="1" :max="99" button-size="44px" input-width="55px" integer
                      class="input-stepper"/>
         <van-button class="add-btn" type="primary" :loading="loading" @click="addToCart()">КУПИТЬ СЕЙЧАС</van-button>
       </div>
@@ -125,7 +125,10 @@ async function shareProduct() {
 
   if (res.code === '0') {
     const telegramUrl = `https://t.me/${res.data.tgUsername}?startapp=${productDetail.value.id}`;
-    window.open(`https://t.me/share/url?url=${telegramUrl}&text=${productDetail.value.name}`)
+    if(window?.Telegram?.WebApp?.openTelegramLink){
+      window.Telegram.WebApp.openTelegramLink(`https://t.me/share/url?url=${telegramUrl}`)
+    }
+    // window.open(`https://t.me/share/url?url=${telegramUrl}&text=${productDetail.value.name}`)
   }
 }
 </script>
@@ -196,7 +199,8 @@ async function shareProduct() {
   }
 
   .add-btn {
-    width: 155px;
+    //width: 150px;
+    padding: 0 10px;
   }
 }
 

@@ -86,8 +86,8 @@ async function getProducts() {
       }
     })
 
-    topProducts.value.sort((a, b) => b.sort - a.sort)
-    productList.value.sort((a, b) => b.sort - a.sort)
+    topProducts.value.sort((a, b) => a.topSort - b.topSort)
+    productList.value.sort((a, b) => a.sort - b.sort)
   }
 }
 
