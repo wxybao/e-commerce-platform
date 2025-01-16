@@ -3,7 +3,7 @@
     <NavBar/>
     <div class="title">Добавить адрес</div>
 
-    <div class="map" id="map"></div>
+<!--    <div class="map" id="map"></div>-->
 
     <van-form class="address-form" label-align="top" @submit="onSubmit" scroll-to-error>
       <van-field
@@ -128,6 +128,7 @@ const apiKey = '0f9177b1-b5b0-4a7d-bb1e-8a58b780a6c2';
 
 // 初始化地图
 async function initMap() {
+  return
   const mapglAPI = await load()
   let defaultCenter = [37.6173, 55.7558]
   map = new mapglAPI.Map('map', {
@@ -241,6 +242,7 @@ const fetchLocationDetailsOrCoordinates = async (param) => {
 
 // 地址改变时需要联动地图
 function addressChange() {
+  return
   let address = `${form.value.city}|${form.value.street}|${form.value.buildingNo}|${form.value.unit}|${form.value.buildingCall}|${form.value.floor}`
 
   // 把|换成，并且去除连续的，以及开头结尾的，
