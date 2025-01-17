@@ -152,7 +152,9 @@ async function getAvatar() {
 function gotoUrl(path) {
   if (path) {
     if (path.indexOf('http') === 0) {
-      window.open(path)
+      if(window?.Telegram?.WebApp?.openTelegramLink){
+        window.Telegram.WebApp.openTelegramLink('https://t.me/RedRocketSupport')
+      }
     } else {
       router.push({name: path})
     }

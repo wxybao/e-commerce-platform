@@ -209,7 +209,9 @@ function setCopy(copyData){
 }
 
 function contact() {
-  window.open('https://t.me/RedRocketSupport')
+  if(window?.Telegram?.WebApp?.openTelegramLink){
+    window.Telegram.WebApp.openTelegramLink('https://t.me/RedRocketSupport')
+  }
 }
 
 async function orderConfirm() {
