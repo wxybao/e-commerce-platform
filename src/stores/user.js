@@ -33,6 +33,9 @@ export const useUserStore = defineStore('user', {
   actions: {
     setShopId(shopId) {
       this.shopId = shopId
+    },
+    setUserAvatar(avatar){
+      this.user.avatar = avatar
     }
   },
   persist: {
