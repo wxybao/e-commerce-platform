@@ -59,7 +59,6 @@ async function getAvatar() {
 
     // 拼接头像地址
     userInfo.value.avatar = `https://api.telegram.org/file/bot${token}/${file_path}`
-    userStore.setUserInfo(userInfo.value.avatar)
   }
 
   // 更新会员信息
