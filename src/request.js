@@ -3,7 +3,7 @@ import {useUserStore} from "@/stores/user.js";
 
 const service = axios.create({
   // baseURL: '/api',
-  baseURL: 'https://www.xjtd.store',
+  baseURL: 'https://www.tgecommerce.xyz',
   withCredentials: false,
   timeout: 10000,
   headers: {'Content-Type': 'application/json'}
